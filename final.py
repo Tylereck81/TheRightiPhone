@@ -1,4 +1,9 @@
+#Tyler Eck 
+#410821337 
+#Data Science Final Project
+#TheRightiPhone
 
+from concurrent.futures import BrokenExecutor
 import requests 
 import numpy as np 
 import pandas as pd
@@ -7,9 +12,14 @@ from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
 import time 
+from selenium.webdriver.common.keys import Keys
 
 driverPath = 'chromedriver.exe'
 
+location = [] 
+prices = [] 
+link = []
+name_on_web = [] 
 
 n = ["iPhone 11", "iPhone 12", "iPhone 13","iPhone SE"]
 t_for_n = [3,4,4,1]
@@ -23,7 +33,55 @@ m_for_mem = [
 [(1,4),(1,5),(1,5),(1,4)],
 [(0,3),(0,0),(0,0),(0,0)]
 ]
+
+def get_real_lists(n,p,l,name,model,memory): 
+    names = [] 
+    price = []
+    links = []
+    memory =str(int(memory[:len(memory)-2]))  #Take out "GB"
+
+    if model != "Regular": 
+        for i in range(len(n)): 
+            if name in n[i] and model in n[i] and memory in n[i]: #checks if name, model,and memory are in the title 
+                if model == "Pro": #filers out the pro max 
+                    if "Max" not in n[i] and "max" not in n[i] and "MAX" not in n[i]:
+                        names.append(n[i])
+                        price.append(p[i])
+                        links.append(l[i])
+                else:
+                    names.append(n[i])
+                    price.append(p[i])
+                    links.append(l[i]) 
+
+
+    else:
+        #list of values that should NOT be in the title if its Regular
+        #I tried to consider all forms of the words, but there is a little room for error -NOTED FOR SUBMISSION
+        nots = ["Pro", "pro","PRO","Pro Max","pro Max", "Pro max", "pro max","PRO MAX", "Mini","mini", "MINI"]
+        for i in range(len(n)): 
+            if name in n[i] and memory in n[i]: #checks if name, model,and memory are in the title 
+                flag = 1
+                for j in nots: 
+                    if j in n[i]: #if any of the words are in n[i] then we WILL NOT ADD to list
+                        flag = 0
+                        break
+                if flag: 
+                    names.append(n[i])
+                    price.append(p[i])
+                    links.append(l[i]) 
+
+    return names,price,links
+
+def fix_price(p): 
+    num ="1234567890" 
+    l = ""
+    for i in range(len(p)):
+        if p[i] in num:
+            l+=p[i]
     
+    return int(l)
+
+
 def search_apple(n,t,m): 
     #Format the string for search in the url
     name = n.split(" ")
@@ -59,9 +117,23 @@ def search_apple(n,t,m):
         select =browser.find_element_by_xpath("//input[@data-autom='choose-noTradeIn']")
         select.click() 
         time.sleep(3)
-
+        
         price = browser.find_element_by_xpath("//span[@data-autom='full-price']")
-        print(price.text)
+        url = browser.current_url
+        
+        p = fix_price(price.text) 
+
+        prices.append(p)
+
+        link.append(url)
+        location.append("Apple")
+
+        if t == "Regular": #without any addition 
+            keyword = n+" "+m
+        else:  #needs to include the model 
+            keyword = n+" "+t+" "+m
+
+        name_on_web.append(keyword)
 
 
     elif (n == "iPhone 12" and t!="Pro" and t!= "Pro Max") or (n=="iPhone 13" and t!="Pro" and t!="Pro Max"): 
@@ -94,7 +166,20 @@ def search_apple(n,t,m):
         time.sleep(3)
 
         price = browser.find_element_by_xpath("//span[@data-autom='full-price']")
-        print(price.text)
+        url = browser.current_url
+        
+        p = fix_price(price.text) 
+
+        prices.append(p)
+        link.append(url)
+        location.append("Apple")
+
+        if t == "Regular": #without any addition 
+            keyword = n+" "+m
+        else:  #needs to include the model 
+            keyword = n+" "+t+" "+m
+
+        name_on_web.append(keyword)
     
     elif n=="iPhone 13" and (t == "Pro" or t=="Pro Max"):
         #opens browser to the weather 
@@ -125,12 +210,119 @@ def search_apple(n,t,m):
         select.click() 
         time.sleep(3)
 
+        #Extract the Price and URL 
         price = browser.find_element_by_xpath("//span[@data-autom='full-price']")
-        print(price.text)
+        url = browser.current_url
+        
+        p = fix_price(price.text) 
+
+        prices.append(p)
+        link.append(url)
+        location.append("Apple")
+        
+        if t == "Regular": #without any addition 
+            keyword = n+" "+m
+        else:  #needs to include the model 
+            keyword = n+" "+t+" "+m
+
+        name_on_web.append(keyword)
+
     else: 
         print("None")
 
-      
+def search_pchome(name,model,memory): 
+
+    #Search PCHome
+    url = "https://shopping.pchome.com.tw/"
+
+    #opens browser to the weather 
+    browser = webdriver.Chrome(executable_path = driverPath)
+    browser.get(url)
+    time.sleep(1)
+
+
+    t_mem = memory[0:len(memory)-2] #formats memory to leave out "gb" to get more results in search
+    if model == "Regular": #without any addition 
+        keyword = name+" "+t_mem
+    else:  #needs to include the model 
+        keyword = name+" "+model+" "+t_mem
+
+
+    inputElement = browser.find_element_by_id("keyword")
+    inputElement.send_keys(keyword) 
+    select = browser.find_element_by_xpath("//span[@class='ico ico_search']")
+    select.click() 
+    time.sleep(4)
+
+    #Page dynamically generates items from search as you scroll down more. Therefore
+    #I will need to scroll all the way to the bottom of the page before crawling occurs
+
+
+    SCROLL_PAUSE_TIME = 0.5
+    # used to get scroll height 
+    p_h = browser.execute_script("return document.body.scrollHeight") #previous height of document 
+
+    while True:
+        #scrolls down by "height" amount (one entire height)
+        browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+
+        #time to load the newly generated items on the page
+        time.sleep(SCROLL_PAUSE_TIME)
+
+        #get the new height 
+        n_h= browser.execute_script("return document.body.scrollHeight") #CURRENT height of document 
+        
+        if n_h == p_h: #if we reach the bottom then we stop 
+            break
+        p_h = n_h #let previous height equal new height (continously scrolls until we hit bottom)
+
+        
+    url = browser.current_url
+
+    names = browser.find_elements_by_xpath("//h5[@class='prod_name']")
+    price_l = browser.find_elements_by_xpath("//ul[@class='price_box']")
+    links = browser.find_elements_by_css_selector(".prod_name [href]")
+    
+    str_names = [i.text for i in names]
+    str_prices = [i.text for i in price_l] 
+    links = [l.get_attribute('href') for l in links]
+
+    P_L = [] 
+    for i in str_prices:
+        P_L.append(fix_price(i))
+    
+
+    
+    time.sleep(4)
+
+    #The filtering on PChome is not so great, therefore I will need to manually check 
+    #items in order to see if it matches with requested iphone specs
+    real_names, real_prices,real_links = get_real_lists(str_names,P_L,links,name,model,memory)
+
+
+    for i in range(len(real_names)):
+        name_on_web.append(real_names[i])
+        prices.append(real_prices[i])
+        link.append(real_links[i])
+        location.append("PCHome")
+
+
+def search_studioA(name,model,memory): 
+    
+    #search Studio A
+    url = "https://www.studioa.com.tw/products?query="
+
+
+    t_mem = memory[0:len(memory)-2] #formats memory to leave out "gb" to get more results in search
+    if model == "Regular": #without any addition 
+        url += name+"%20"+t_mem
+    else:  #needs to include the model 
+        url += name+"%20"+model+"%20"+t_mem
+
+       #opens browser to the weather 
+    browser = webdriver.Chrome(executable_path = driverPath)
+    browser.get(url)
+    time.sleep(4)
 
 
 def model_select(n):
@@ -181,10 +373,33 @@ print(name+" "+model+" "+memory)
 
 
 
-search_apple(name,model,memory)
+# search_apple(name,model,memory)
+# search_pchome(name,model, memory)
+search_studioA(name,model,memory)
 
 
+# print(len(name_on_web))
+# print(len(location))
+# print(len(prices))
+# print(len(link))
 
+# print(name_on_web)
+# print(location)
+# print(prices)
+# print(link)
+
+dict = { 
+    "Name on Web":name_on_web,
+    "Location":location, 
+    "Price":prices,
+    "Link":link
+}
+
+df = pd.DataFrame(dict) 
+
+df = df.sort_values(by=['Price'])
+df2 = df.reset_index(drop=True)
+print(df2)
 
 
 
