@@ -6,9 +6,10 @@
 
 #TKINTER 
 import tkinter as tk
-from tkinter import ttk
+from tkinter import PhotoImage, ttk
 from tkinter import messagebox
 import threading
+from PIL import Image,ImageTk
 
 import requests 
 import numpy as np 
@@ -430,7 +431,7 @@ root = tk.Tk()
 root.title('The Right iPhone')
 
 window_height = 700
-window_width = 1000
+window_width = 1200
 
 #Window and Design Setup 
 screen_width = root.winfo_screenwidth()
@@ -441,6 +442,65 @@ root.geometry("{}x{}+{}+{}".format(window_width, window_height, x_cordinate, y_c
 style = ttk.Style(root)
 root.tk.call('source', 'GUI_Design/azure dark.tcl')
 style.theme_use('azure')
+
+def resize_image(loc,w,h): 
+    iphone = Image.open(loc)
+    iphone = iphone.resize((w,h))
+    img = ImageTk.PhotoImage(iphone)
+    return img 
+
+
+iPhone11 = resize_image('Pictures/iPhone11.png',250,350)
+iPhone12 = resize_image('Pictures/iPhone12.png',250,350)
+iPhone13 = resize_image('Pictures/iPhone13.png',250,350)
+iPhoneSE = resize_image('Pictures/iPhoneSE.png',250,350)
+
+ip11 = tk.Frame(root, width = 300, height = 600)
+ip12 = tk.Frame(root, width = 300, height = 600)
+ip13 = tk.Frame(root, width = 300, height = 600)
+ipse = tk.Frame(root, width = 300, height = 600)
+ip11.place(x = 0, y = 110)
+ip12.place(x = 300, y = 110)
+ip13.place(x = 600, y = 110)
+ipse.place(x = 900, y = 110)
+
+iphone11 = tk.Button(ip11, image = iPhone11) 
+iphone11.place(x = 20, y = 60)
+
+def hovered_over(e,imgname, but):
+    bigger_img = resize_image('Pictures/'+imgname+'.png',280,380)
+    but.config(image = bigger_img)
+    but.image = bigger_img
+    but.place(x=10, y = 50)
+
+def not_hovered_over(e,imgname, but):
+    normal_img = resize_image('Pictures/'+imgname+'.png',250,350)
+    but.config(image = normal_img)
+    but.image = normal_img
+    but.place(x=20, y = 60) 
+
+iphone11.bind("<Enter>",lambda event: hovered_over(event, "iPhone11", iphone11)) 
+iphone11.bind("<Leave>",lambda event: not_hovered_over(event, "iPhone11", iphone11))
+
+
+iphone12 = tk.Button(ip12, image = iPhone12) 
+iphone12.place(x = 20, y = 60)
+iphone12.bind("<Enter>",lambda event: hovered_over(event, "iPhone12", iphone12)) 
+iphone12.bind("<Leave>",lambda event: not_hovered_over(event, "iPhone12", iphone12))
+
+
+iphone13 = tk.Button(ip13, image = iPhone13) 
+iphone13.place(x = 20, y = 60)
+iphone13.bind("<Enter>",lambda event: hovered_over(event, "iPhone13", iphone13)) 
+iphone13.bind("<Leave>",lambda event: not_hovered_over(event, "iPhone13", iphone13))
+
+iphonese = tk.Button(ipse, image = iPhoneSE) 
+iphonese.place(x = 20, y = 60)
+iphonese.bind("<Enter>",lambda event: hovered_over(event, "iPhoneSE", iphonese)) 
+iphonese.bind("<Leave>",lambda event: not_hovered_over(event, "iPhoneSE", iphonese))
+
+
+
 
 def main():
 
