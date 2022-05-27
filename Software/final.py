@@ -6,6 +6,7 @@
 
 #TKINTER 
 from ast import Mod
+from operator import mod
 from telnetlib import IP
 import tkinter as tk
 from tkinter import PhotoImage, ttk
@@ -29,6 +30,10 @@ location = []
 prices = [] 
 link = []
 name_on_web = [] 
+
+SEARCH_NAME = ""
+SEARCH_MODEL = "" 
+SEARCH_STORAGE = ""
 
 
 n = ["iPhone 11", "iPhone 12", "iPhone 13","iPhone SE"]
@@ -371,14 +376,10 @@ def memory_select(name,model):
     name = name - 1 
     model = model - 1
     start,finish = m_for_mem[name][model]
+    STORAGE = [] 
     for i in range(start,finish): 
-        print(str(i)+"-"+mem[i]) 
-    memory = int(input())
-    while(memory<start or memory>=finish): 
-        print("Invalid Number, enter another")
-        memory = int(input())
-    
-    return memory
+        STORAGE.append(mem[i])
+    return STORAGE
 
 def iphone_select(): 
     print('iPhone Best Price Finder')
@@ -415,16 +416,43 @@ def not_hovered_over(e,imgname, but,locx,locy,hovx,hovy):
     but.place(x=locx, y = locy) 
 
 def go_to_model(name):
-    
+    global SEARCH_NAME
     show_frame(ModelSelection)
     if name == 1: 
         show_frame(iPhone11_MODEL_FRAME)
+        SEARCH_NAME = n[0]
+        print(SEARCH_NAME)
     elif name == 2:
         show_frame(iPhone12_MODEL_FRAME)
+        SEARCH_NAME = n[1]
+        print(SEARCH_NAME)
     elif name == 3:
         show_frame(iPhone13_MODEL_FRAME)
+        SEARCH_NAME = n[2]
+        print(SEARCH_NAME)
     elif name == 4:
         show_frame(iPhoneSE_MODEL_FRAME)
+        SEARCH_NAME = n[3]
+        print(SEARCH_NAME)
+
+def go_to_storage(s):
+    global SEARCH_NAME
+    SEARCH_MODEL = m[s-1]
+    model = s-1
+    name = n.index(SEARCH_NAME) 
+    start,finish = m_for_mem[name][model]
+    print(start,finish)
+    MEMORY = [] 
+    for i in range(start, finish): 
+        MEMORY.append(mem[i])
+    
+    print(SEARCH_NAME+SEARCH_MODEL)
+    print(MEMORY)
+
+
+        
+    
+
 
 
 
@@ -535,22 +563,22 @@ ip13.place(x = 600, y = 110)
 ipse.place(x = 900, y = 110)
 
 #Placing the images in their respective frames and binding the hovering option to them 
-iphone11 = tk.Button(ip11, image = iPhone11, command = lambda:go_to_model(1) ) 
+iphone11 = tk.Button(ip11, image = iPhone11, command = lambda:go_to_model(1)) 
 iphone11.place(x = 20, y = 60)
 iphone11.bind("<Enter>",lambda event: hovered_over(event, "iPhone11", iphone11,10,50,280,380)) 
 iphone11.bind("<Leave>",lambda event: not_hovered_over(event, "iPhone11", iphone11,20,60,250,350))
 
-iphone12 = tk.Button(ip12, image = iPhone12, command = lambda:go_to_model(2) ) 
+iphone12 = tk.Button(ip12, image = iPhone12, command = lambda:go_to_model(2)) 
 iphone12.place(x = 20, y = 60)
 iphone12.bind("<Enter>",lambda event: hovered_over(event, "iPhone12", iphone12,10,50,280,380)) 
 iphone12.bind("<Leave>",lambda event: not_hovered_over(event, "iPhone12", iphone12,20,60,250,350))
 
-iphone13 = tk.Button(ip13, image = iPhone13, command = lambda:go_to_model(3) ) 
+iphone13 = tk.Button(ip13, image = iPhone13, command = lambda:go_to_model(3)) 
 iphone13.place(x = 20, y = 60)
 iphone13.bind("<Enter>",lambda event: hovered_over(event, "iPhone13", iphone13,10,50,280,380)) 
 iphone13.bind("<Leave>",lambda event: not_hovered_over(event, "iPhone13", iphone13,20,60,250,350))
 
-iphonese = tk.Button(ipse, image = iPhoneSE, command = lambda:go_to_model(4) ) 
+iphonese = tk.Button(ipse, image = iPhoneSE, command = lambda:go_to_model(4)) 
 iphonese.place(x = 20, y = 60)
 iphonese.bind("<Enter>",lambda event: hovered_over(event, "iPhoneSE", iphonese,10,50,280,380)) 
 iphonese.bind("<Leave>",lambda event: not_hovered_over(event, "iPhoneSE", iphonese,20,60,250,350))
@@ -572,75 +600,78 @@ px2 = 20
 px3 = 20
 px4 = 450
 #Frames for iPhone 11 Models 
-ip11m1 = tk.Button(iPhone11_MODEL_FRAME,image = iPhone11_Regular)
+ip11m1 = tk.Button(iPhone11_MODEL_FRAME,image = iPhone11_Regular, command = lambda:go_to_storage(1))
 ip11m1.place(x = 0+px1, y = 110)
 ip11m1.bind("<Enter>",lambda event: hovered_over(event, "iPhone11_Regular", ip11m1, px1-10, 100,280,380)) 
 ip11m1.bind("<Leave>",lambda event: not_hovered_over(event, "iPhone11_Regular", ip11m1, 0+px1, 110,250,350))
 
 
-ip11m2 = tk.Button (iPhone11_MODEL_FRAME, image = iPhone11_Pro)
+ip11m2 = tk.Button (iPhone11_MODEL_FRAME, image = iPhone11_Pro, command = lambda:go_to_storage(2))
 ip11m2.place(x = 400+px1, y = 110)
 ip11m2.bind("<Enter>",lambda event: hovered_over(event, "iPhone11_Pro", ip11m2, 400+px1-10, 100,280,380)) 
 ip11m2.bind("<Leave>",lambda event: not_hovered_over(event, "iPhone11_Pro", ip11m2, 400+px1, 110,250,350))
 
 
-ip11m3 = tk.Button(iPhone11_MODEL_FRAME,image = iPhone11_Pro_Max)
+ip11m3 = tk.Button(iPhone11_MODEL_FRAME,image = iPhone11_Pro_Max, command = lambda:go_to_storage(3))
 ip11m3.place(x = 800+px1, y = 90)
 ip11m3.bind("<Enter>",lambda event: hovered_over(event, "iPhone11_Pro_Max", ip11m3, 800+px1-10, 100,300,400)) 
 ip11m3.bind("<Leave>",lambda event: not_hovered_over(event, "iPhone11_Pro_Max", ip11m3, 800+px1, 90,270,370))
 
 
 #Frames for iPhone 12 Models 
-ip12m1 = tk.Button(iPhone12_MODEL_FRAME,image = iPhone12_Regular)
+ip12m1 = tk.Button(iPhone12_MODEL_FRAME,image = iPhone12_Regular, command = lambda:go_to_storage(1))
 ip12m1.place(x = 0+px2, y = 110)
 ip12m1.bind("<Enter>",lambda event: hovered_over(event, "iPhone12_Regular", ip12m1, px2-10, 100,280,380)) 
 ip12m1.bind("<Leave>",lambda event: not_hovered_over(event, "iPhone12_Regular", ip12m1, 0+px2, 110,250,350))
 
-ip12m2 = tk.Button (iPhone12_MODEL_FRAME, image = iPhone12_Pro)
+ip12m2 = tk.Button (iPhone12_MODEL_FRAME, image = iPhone12_Pro, command = lambda:go_to_storage(2))
 ip12m2.place(x = 300+px2, y = 110)
 ip12m2.bind("<Enter>",lambda event: hovered_over(event, "iPhone12_Pro", ip12m2, 300+px2-10, 100,280,380)) 
 ip12m2.bind("<Leave>",lambda event: not_hovered_over(event, "iPhone12_Pro", ip12m2, 300+px2, 110,250,350))
 
-ip12m3 = tk.Button(iPhone12_MODEL_FRAME,image = iPhone12_Pro_Max)
+ip12m3 = tk.Button(iPhone12_MODEL_FRAME,image = iPhone12_Pro_Max, command = lambda:go_to_storage(3))
 ip12m3.place(x = 600+px2, y = 90)
 ip12m3.bind("<Enter>",lambda event: hovered_over(event, "iPhone12_Pro_Max", ip12m3, 600+px2-10, 100,300,400))
 ip12m3.bind("<Leave>",lambda event: not_hovered_over(event, "iPhone12_Pro_Max", ip12m3, 600+px2, 90,270,370))
 
 
-ip12m4 = tk.Button(iPhone12_MODEL_FRAME,image = iPhone12_Mini)
+ip12m4 = tk.Button(iPhone12_MODEL_FRAME,image = iPhone12_Mini, command = lambda:go_to_storage(4))
 ip12m4.place(x = 900+px2, y = 140)
 ip12m4.bind("<Enter>",lambda event: hovered_over(event, "iPhone12_Mini", ip12m4, 900+px2-10, 130,250,350)) 
 ip12m4.bind("<Leave>",lambda event: not_hovered_over(event, "iPhone12_Mini", ip12m4, 900+px2, 140,220,320))
 
 
 #Frames for iPhone 13 Models 
-ip13m1 = tk.Button(iPhone13_MODEL_FRAME,image = iPhone13_Regular)
+ip13m1 = tk.Button(iPhone13_MODEL_FRAME,image = iPhone13_Regular, command = lambda:go_to_storage(1))
 ip13m1.place(x = 0+px3, y = 110)
 ip13m1.bind("<Enter>",lambda event: hovered_over(event, "iPhone13_Regular", ip13m1, px3-10, 100,280,380)) 
 ip13m1.bind("<Leave>",lambda event: not_hovered_over(event, "iPhone13_Regular", ip13m1, 0+px3, 110,250,350))
 
-ip13m2 = tk.Button (iPhone13_MODEL_FRAME, image = iPhone13_Pro)
+ip13m2 = tk.Button (iPhone13_MODEL_FRAME, image = iPhone13_Pro, command = lambda:go_to_storage(2))
 ip13m2.place(x = 300+px3, y = 110)
 ip13m2.bind("<Enter>",lambda event: hovered_over(event, "iPhone13_Pro", ip13m2, 300+px3-10, 100,280,380)) 
 ip13m2.bind("<Leave>",lambda event: not_hovered_over(event, "iPhone13_Pro", ip13m2, 300+px3, 110,250,350))
 
-ip13m3 = tk.Button(iPhone13_MODEL_FRAME,image = iPhone13_Pro_Max)
+ip13m3 = tk.Button(iPhone13_MODEL_FRAME,image = iPhone13_Pro_Max, command = lambda:go_to_storage(3))
 ip13m3.place(x = 600+px3, y = 110)
 ip13m3.bind("<Enter>",lambda event: hovered_over(event, "iPhone13_Pro_Max", ip13m3, 600+px2-10, 100,300,400))
 ip13m3.bind("<Leave>",lambda event: not_hovered_over(event, "iPhone13_Pro_Max", ip13m3, 600+px2, 90,270,370))
 
-ip13m4 = tk.Button(iPhone13_MODEL_FRAME,image = iPhone13_Mini)
+ip13m4 = tk.Button(iPhone13_MODEL_FRAME,image = iPhone13_Mini, command = lambda:go_to_storage(4))
 ip13m4.place(x = 900+px3, y = 110)
 ip13m4.bind("<Enter>",lambda event: hovered_over(event, "iPhone13_Mini", ip13m4, 900+px2-10, 130,250,350)) 
 ip13m4.bind("<Leave>",lambda event: not_hovered_over(event, "iPhone13_Mini", ip13m4, 900+px2, 140,220,320))
 
 #Frames for iPhone SE Models 
-ipsem1 = tk.Button(iPhoneSE_MODEL_FRAME,image = iPhoneSE_Regular)
+ipsem1 = tk.Button(iPhoneSE_MODEL_FRAME,image = iPhoneSE_Regular, command = lambda:go_to_storage(1))
 ipsem1.place(x = 0+px4, y = 110)
 ipsem1.bind("<Enter>",lambda event: hovered_over(event, "iPhoneSE_Regular", ipsem1, px4-10, 100,280,380)) 
 ipsem1.bind("<Leave>",lambda event: not_hovered_over(event, "iPhoneSE_Regular", ipsem1, 0+px4, 110,250,350))
 
 ###################### THIRD PAGE - STORAGE SELECTION SCREEN ########################
+
+
+
 
 
 def main():
