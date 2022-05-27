@@ -21,6 +21,7 @@ prices = []
 link = []
 name_on_web = [] 
 
+
 n = ["iPhone 11", "iPhone 12", "iPhone 13","iPhone SE"]
 t_for_n = [3,4,4,1]
 m = ["Regular","Pro","Pro Max","Mini"]
@@ -240,8 +241,9 @@ def search_pchome(name,model,memory):
     browser.get(url)
     time.sleep(1)
 
-
-    t_mem = memory[0:len(memory)-2] #formats memory to leave out "gb" to get more results in search
+    t_mem = memory 
+    if memory != "1TB": #for TB we leave the "TB" at the end 
+        t_mem = memory[0:len(memory)-2] #formats memory to leave out "gb" to get more results in search
     if model == "Regular": #without any addition 
         keyword = name+" "+t_mem
     else:  #needs to include the model 
@@ -309,21 +311,45 @@ def search_pchome(name,model,memory):
 
 def search_studioA(name,model,memory): 
     
-    #search Studio A
-    url = "https://www.studioa.com.tw/products?query="
+    #search Studio A - short iphone section because it is limited
+    url = "https://www.studioa.com.tw/categories/iphone?sort_by=lowest_price&order_by=desc"
 
-
-    t_mem = memory[0:len(memory)-2] #formats memory to leave out "gb" to get more results in search
-    if model == "Regular": #without any addition 
-        url += name+"%20"+t_mem
-    else:  #needs to include the model 
-        url += name+"%20"+model+"%20"+t_mem
-
-       #opens browser to the weather 
+    #opens browser to the weather 
     browser = webdriver.Chrome(executable_path = driverPath)
     browser.get(url)
     time.sleep(4)
 
+    names = browser.find_elements_by_xpath("//div[@class='title text-primary-color title-container ellipsis ']")
+    price_l = browser.find_elements_by_xpath("//div[@class='quick-cart-price']")
+    links = browser.find_elements_by_xpath("//a[@class='quick-cart-item']")
+    
+
+    str_names = [i.text for i in names]
+    links = [l.get_attribute('href') for l in links]
+
+    #SOME ITEMS have a sale price and some just have a regular price, therefore
+    #I need to get the smaller prices for the two prices recieved 
+    price_real = [] 
+    for i in range(len(names)):
+        l= price_l[i].text
+        l = l.split("\n")
+        if len(l) == 2: 
+            price_real.append(fix_price(l[1]))
+        else: 
+            price_real.append(fix_price(l[0]))
+    
+    #The filtering on Studio A includes extra data, therefore I will need to manually check 
+    #items in order to see if it matches with requested iphone specs
+    real_names, real_prices,real_links = get_real_lists(str_names,price_real,links,name,model,memory)
+
+
+    for i in range(len(real_names)):
+        name_on_web.append(real_names[i])
+        prices.append(real_prices[i])
+        link.append(real_links[i])
+        location.append("Studio A")
+    
+        
 
 def model_select(n):
     num = t_for_n[n-1]
@@ -373,20 +399,11 @@ print(name+" "+model+" "+memory)
 
 
 
-# search_apple(name,model,memory)
-# search_pchome(name,model, memory)
+search_apple(name,model,memory)
+search_pchome(name,model, memory)
 search_studioA(name,model,memory)
 
 
-# print(len(name_on_web))
-# print(len(location))
-# print(len(prices))
-# print(len(link))
-
-# print(name_on_web)
-# print(location)
-# print(prices)
-# print(link)
 
 dict = { 
     "Name on Web":name_on_web,
@@ -401,15 +418,3 @@ df = df.sort_values(by=['Price'])
 df2 = df.reset_index(drop=True)
 print(df2)
 
-
-
-
-# #opens browser to the weather website
-# browser.get(url)
-# time.sleep(1)
-
-# #requests the page and then extracts the div of the titles 
-# html = requests.get(url) 
-# html.encoding="utf-8"
-# sp = bs(html.text, 'html.parser')
-# a0 = sp.find_all("div",class_= "cbp-item")
