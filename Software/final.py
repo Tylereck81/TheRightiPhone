@@ -6,6 +6,7 @@
 
 #TKINTER 
 from ast import Mod
+from ctypes import resize
 from operator import mod
 from telnetlib import IP
 import tkinter as tk
@@ -435,10 +436,13 @@ def go_to_model(name):
         SEARCH_NAME = n[3]
         print(SEARCH_NAME)
 
-def go_to_storage(s):
+def go_to_storage(SEL_MODEL, s):
+    show_frame(StorageSelection)
+
     global SEARCH_NAME
-    SEARCH_MODEL = m[s-1]
-    model = s-1
+    global SEARCH_MODEL
+    SEARCH_MODEL = m[SEL_MODEL-1]
+    model = SEL_MODEL-1
     name = n.index(SEARCH_NAME) 
     start,finish = m_for_mem[name][model]
     print(start,finish)
@@ -448,13 +452,26 @@ def go_to_storage(s):
     
     print(SEARCH_NAME+SEARCH_MODEL)
     print(MEMORY)
-
-
-        
     
+    if s == 1: #(0,2)
+        show_frame(MEMPG1)
+    
+    elif s == 2: #(0,3)
+        show_frame(MEMPG2)
+    
+    elif s == 3: #(0,4) 
+        show_frame(MEMPG3)
+    
+    elif s == 4: #(1,4) 
+        show_frame(MEMPG4)
+    
+    elif s == 5: #(1,5)
+        show_frame(MEMPG5)
 
-
-
+def search(l): 
+    global SEARCH_NAME
+    global SEARCH_MODEL
+    print(SEARCH_NAME+" "+ SEARCH_MODEL+" "+str(l))
 
 #Function to switch between frames 
 def show_frame(frame): 
@@ -509,7 +526,9 @@ root.tk.call('source', 'GUI_Design/azure dark.tcl')
 style.theme_use('azure')
 
 
+
 # Importing the Pictures used in the program as visual aid and resizing them to be the same size
+TITLE = resize_image('Pictures/TITLE.png',1200,90)
 iPhone11 = resize_image('Pictures/iPhone11.png',250,350)
 iPhone12 = resize_image('Pictures/iPhone12.png',250,350)
 iPhone13 = resize_image('Pictures/iPhone13.png',250,350)
@@ -531,12 +550,21 @@ iPhone13_Mini = resize_image('Pictures/iPhone13_Mini.png',220,320)
 
 iPhoneSE_Regular = resize_image('Pictures/iPhoneSE_Regular.png',250,350)
 
+mem1 = resize_image('Pictures/64GB.png',250,350)
+mem2 = resize_image('Pictures/128GB.png',250,350)
+mem3 = resize_image('Pictures/256GB.png',250,350)
+mem4 = resize_image('Pictures/512GB.png',250,350)
+mem5 = resize_image('Pictures/1TB.png',250,350)
 
 #Making the different screens so that we can go through selections 
 
 #FRAME 1 - IPHONE SELECTION PAGE
 iPhoneSelection = tk.Frame(root,width = 1200, height = 700)
 iPhoneSelection.place(x = 0, y = 0)
+
+
+TITLE = tk.Label(iPhoneSelection, image = TITLE) 
+TITLE.place(x = 0, y = 0)
 
 #FRAME 2 - MODEL SELECTION PAGE
 ModelSelection = tk.Frame(root,width = 1200, height = 700)
@@ -600,75 +628,175 @@ px2 = 20
 px3 = 20
 px4 = 450
 #Frames for iPhone 11 Models 
-ip11m1 = tk.Button(iPhone11_MODEL_FRAME,image = iPhone11_Regular, command = lambda:go_to_storage(1))
+ip11m1 = tk.Button(iPhone11_MODEL_FRAME,image = iPhone11_Regular, command = lambda:go_to_storage(1,1))
 ip11m1.place(x = 0+px1, y = 110)
 ip11m1.bind("<Enter>",lambda event: hovered_over(event, "iPhone11_Regular", ip11m1, px1-10, 100,280,380)) 
 ip11m1.bind("<Leave>",lambda event: not_hovered_over(event, "iPhone11_Regular", ip11m1, 0+px1, 110,250,350))
 
 
-ip11m2 = tk.Button (iPhone11_MODEL_FRAME, image = iPhone11_Pro, command = lambda:go_to_storage(2))
+ip11m2 = tk.Button (iPhone11_MODEL_FRAME, image = iPhone11_Pro, command = lambda:go_to_storage(2,3))
 ip11m2.place(x = 400+px1, y = 110)
 ip11m2.bind("<Enter>",lambda event: hovered_over(event, "iPhone11_Pro", ip11m2, 400+px1-10, 100,280,380)) 
 ip11m2.bind("<Leave>",lambda event: not_hovered_over(event, "iPhone11_Pro", ip11m2, 400+px1, 110,250,350))
 
 
-ip11m3 = tk.Button(iPhone11_MODEL_FRAME,image = iPhone11_Pro_Max, command = lambda:go_to_storage(3))
+ip11m3 = tk.Button(iPhone11_MODEL_FRAME,image = iPhone11_Pro_Max, command = lambda:go_to_storage(3,3))
 ip11m3.place(x = 800+px1, y = 90)
 ip11m3.bind("<Enter>",lambda event: hovered_over(event, "iPhone11_Pro_Max", ip11m3, 800+px1-10, 100,300,400)) 
 ip11m3.bind("<Leave>",lambda event: not_hovered_over(event, "iPhone11_Pro_Max", ip11m3, 800+px1, 90,270,370))
 
 
 #Frames for iPhone 12 Models 
-ip12m1 = tk.Button(iPhone12_MODEL_FRAME,image = iPhone12_Regular, command = lambda:go_to_storage(1))
+ip12m1 = tk.Button(iPhone12_MODEL_FRAME,image = iPhone12_Regular, command = lambda:go_to_storage(1,2))
 ip12m1.place(x = 0+px2, y = 110)
 ip12m1.bind("<Enter>",lambda event: hovered_over(event, "iPhone12_Regular", ip12m1, px2-10, 100,280,380)) 
 ip12m1.bind("<Leave>",lambda event: not_hovered_over(event, "iPhone12_Regular", ip12m1, 0+px2, 110,250,350))
 
-ip12m2 = tk.Button (iPhone12_MODEL_FRAME, image = iPhone12_Pro, command = lambda:go_to_storage(2))
+ip12m2 = tk.Button (iPhone12_MODEL_FRAME, image = iPhone12_Pro, command = lambda:go_to_storage(2,4))
 ip12m2.place(x = 300+px2, y = 110)
 ip12m2.bind("<Enter>",lambda event: hovered_over(event, "iPhone12_Pro", ip12m2, 300+px2-10, 100,280,380)) 
 ip12m2.bind("<Leave>",lambda event: not_hovered_over(event, "iPhone12_Pro", ip12m2, 300+px2, 110,250,350))
 
-ip12m3 = tk.Button(iPhone12_MODEL_FRAME,image = iPhone12_Pro_Max, command = lambda:go_to_storage(3))
+ip12m3 = tk.Button(iPhone12_MODEL_FRAME,image = iPhone12_Pro_Max, command = lambda:go_to_storage(3,4))
 ip12m3.place(x = 600+px2, y = 90)
 ip12m3.bind("<Enter>",lambda event: hovered_over(event, "iPhone12_Pro_Max", ip12m3, 600+px2-10, 100,300,400))
 ip12m3.bind("<Leave>",lambda event: not_hovered_over(event, "iPhone12_Pro_Max", ip12m3, 600+px2, 90,270,370))
 
 
-ip12m4 = tk.Button(iPhone12_MODEL_FRAME,image = iPhone12_Mini, command = lambda:go_to_storage(4))
+ip12m4 = tk.Button(iPhone12_MODEL_FRAME,image = iPhone12_Mini, command = lambda:go_to_storage(4,2))
 ip12m4.place(x = 900+px2, y = 140)
 ip12m4.bind("<Enter>",lambda event: hovered_over(event, "iPhone12_Mini", ip12m4, 900+px2-10, 130,250,350)) 
 ip12m4.bind("<Leave>",lambda event: not_hovered_over(event, "iPhone12_Mini", ip12m4, 900+px2, 140,220,320))
 
 
 #Frames for iPhone 13 Models 
-ip13m1 = tk.Button(iPhone13_MODEL_FRAME,image = iPhone13_Regular, command = lambda:go_to_storage(1))
+ip13m1 = tk.Button(iPhone13_MODEL_FRAME,image = iPhone13_Regular, command = lambda:go_to_storage(1,4))
 ip13m1.place(x = 0+px3, y = 110)
 ip13m1.bind("<Enter>",lambda event: hovered_over(event, "iPhone13_Regular", ip13m1, px3-10, 100,280,380)) 
 ip13m1.bind("<Leave>",lambda event: not_hovered_over(event, "iPhone13_Regular", ip13m1, 0+px3, 110,250,350))
 
-ip13m2 = tk.Button (iPhone13_MODEL_FRAME, image = iPhone13_Pro, command = lambda:go_to_storage(2))
+ip13m2 = tk.Button (iPhone13_MODEL_FRAME, image = iPhone13_Pro, command = lambda:go_to_storage(2,5))
 ip13m2.place(x = 300+px3, y = 110)
 ip13m2.bind("<Enter>",lambda event: hovered_over(event, "iPhone13_Pro", ip13m2, 300+px3-10, 100,280,380)) 
 ip13m2.bind("<Leave>",lambda event: not_hovered_over(event, "iPhone13_Pro", ip13m2, 300+px3, 110,250,350))
 
-ip13m3 = tk.Button(iPhone13_MODEL_FRAME,image = iPhone13_Pro_Max, command = lambda:go_to_storage(3))
-ip13m3.place(x = 600+px3, y = 110)
+ip13m3 = tk.Button(iPhone13_MODEL_FRAME,image = iPhone13_Pro_Max, command = lambda:go_to_storage(3,5))
+ip13m3.place(x = 600+px3, y = 90)
 ip13m3.bind("<Enter>",lambda event: hovered_over(event, "iPhone13_Pro_Max", ip13m3, 600+px2-10, 100,300,400))
 ip13m3.bind("<Leave>",lambda event: not_hovered_over(event, "iPhone13_Pro_Max", ip13m3, 600+px2, 90,270,370))
 
-ip13m4 = tk.Button(iPhone13_MODEL_FRAME,image = iPhone13_Mini, command = lambda:go_to_storage(4))
-ip13m4.place(x = 900+px3, y = 110)
+ip13m4 = tk.Button(iPhone13_MODEL_FRAME,image = iPhone13_Mini, command = lambda:go_to_storage(4,4))
+ip13m4.place(x = 900+px3, y = 140)
 ip13m4.bind("<Enter>",lambda event: hovered_over(event, "iPhone13_Mini", ip13m4, 900+px2-10, 130,250,350)) 
 ip13m4.bind("<Leave>",lambda event: not_hovered_over(event, "iPhone13_Mini", ip13m4, 900+px2, 140,220,320))
 
 #Frames for iPhone SE Models 
-ipsem1 = tk.Button(iPhoneSE_MODEL_FRAME,image = iPhoneSE_Regular, command = lambda:go_to_storage(1))
+ipsem1 = tk.Button(iPhoneSE_MODEL_FRAME,image = iPhoneSE_Regular, command = lambda:go_to_storage(1,2))
 ipsem1.place(x = 0+px4, y = 110)
 ipsem1.bind("<Enter>",lambda event: hovered_over(event, "iPhoneSE_Regular", ipsem1, px4-10, 100,280,380)) 
 ipsem1.bind("<Leave>",lambda event: not_hovered_over(event, "iPhoneSE_Regular", ipsem1, 0+px4, 110,250,350))
 
 ###################### THIRD PAGE - STORAGE SELECTION SCREEN ########################
+
+MEMPG1 = tk.Frame(StorageSelection, width = 1200, height = 700) #(0,2)
+MEMPG2 = tk.Frame(StorageSelection, width = 1200, height = 700)
+MEMPG3 = tk.Frame(StorageSelection, width = 1200, height = 700)
+MEMPG4 = tk.Frame(StorageSelection, width = 1200, height = 700)
+MEMPG5 = tk.Frame(StorageSelection, width = 1200, height = 700)
+MEMPG1.place(x = 0, y = 0)
+MEMPG2.place(x = 0, y = 0)
+MEMPG3.place(x = 0, y = 0)
+MEMPG4.place(x = 0, y = 0)
+MEMPG5.place(x = 0, y = 0)
+
+
+#(0,2)
+M1B1 = tk.Button(MEMPG1,image = mem1, command = lambda:search(64))
+M1B1.place(x = 200+px1, y = 110)
+M1B1.bind("<Enter>",lambda event: hovered_over(event, "64GB", M1B1, 200+px1-10, 100,280,380)) 
+M1B1.bind("<Leave>",lambda event: not_hovered_over(event, "64GB", M1B1, 200+px1, 110,250,350))
+
+M1B2 = tk.Button(MEMPG1,image = mem2, command = lambda:search(128))
+M1B2.place(x = 600+px1, y = 110)
+M1B2.bind("<Enter>",lambda event: hovered_over(event, "128GB", M1B2, 600+px1-10, 100,280,380)) 
+M1B2.bind("<Leave>",lambda event: not_hovered_over(event, "128GB", M1B2, 600+px1, 110,250,350))
+
+
+#(0,3)
+M2B1 = tk.Button(MEMPG2,image = mem1, command = lambda:search(64))
+M2B1.place(x = 0+px1, y = 110)
+M2B1.bind("<Enter>",lambda event: hovered_over(event, "64GB", M2B1, px1-10, 100,280,380)) 
+M2B1.bind("<Leave>",lambda event: not_hovered_over(event, "64GB", M2B1, 0+px1, 110,250,350))
+
+M2B2 = tk.Button(MEMPG2,image = mem2, command = lambda:search(128))
+M2B2.place(x = 400+px1, y = 110)
+M2B2.bind("<Enter>",lambda event: hovered_over(event, "128GB", M2B2, 400+px1-10, 100,280,380)) 
+M2B2.bind("<Leave>",lambda event: not_hovered_over(event, "128GB", M2B2, 400+px1, 110,250,350))
+
+M2B3 = tk.Button(MEMPG2,image = mem3, command = lambda:search(256))
+M2B3.place(x = 800+px1, y = 110)
+M2B3.bind("<Enter>",lambda event: hovered_over(event, "256GB", M2B3, 800+px1-10, 100,280,380)) 
+M2B3.bind("<Leave>",lambda event: not_hovered_over(event, "256GB", M2B3,800+px1, 110,250,350))
+
+#(0,4)
+M3B1 = tk.Button(MEMPG3,image = mem1, command = lambda:search(64))
+M3B1.place(x = 0+px3, y = 110)
+M3B1.bind("<Enter>",lambda event: hovered_over(event, "64GB", M3B1, px3-10, 100,280,380)) 
+M3B1.bind("<Leave>",lambda event: not_hovered_over(event, "64GB", M3B1, 0+px3, 110,250,350))
+
+M3B2 = tk.Button(MEMPG3,image = mem2, command = lambda:search(128))
+M3B2.place(x = 300+px3, y = 110)
+M3B2.bind("<Enter>",lambda event: hovered_over(event, "128GB", M3B2, 300+px3-10, 100,280,380)) 
+M3B2.bind("<Leave>",lambda event: not_hovered_over(event, "128GB", M3B2, 300+px3, 110,250,350))
+
+M3B3 = tk.Button(MEMPG3,image = mem3, command = lambda:search(256))
+M3B3.place(x = 600+px3, y = 110)
+M3B3.bind("<Enter>",lambda event: hovered_over(event, "256GB", M3B3, 600+px3-10, 100,280,380)) 
+M3B3.bind("<Leave>",lambda event: not_hovered_over(event, "256GB", M3B3, 600+px3, 110,250,350))
+
+M3B4 = tk.Button(MEMPG3,image = mem4, command = lambda:search(512))
+M3B4.place(x = 900+px3, y = 110)
+M3B4.bind("<Enter>",lambda event: hovered_over(event, "512GB", M3B4, 900+px3-10, 100,280,380)) 
+M3B4.bind("<Leave>",lambda event: not_hovered_over(event, "512GB", M3B4, 900+px3, 110,250,350))
+
+
+#(1,4)
+M4B1 = tk.Button(MEMPG4,image = mem2, command = lambda:search(128))
+M4B1.place(x = 0+px1, y = 110)
+M4B1.bind("<Enter>",lambda event: hovered_over(event, "128GB", M4B1, px1-10, 100,280,380)) 
+M4B1.bind("<Leave>",lambda event: not_hovered_over(event, "128GB", M4B1, 0+px1, 110,250,350))
+
+M4B2 = tk.Button(MEMPG4,image = mem3, command = lambda:search(256))
+M4B2.place(x = 400+px1, y = 110)
+M4B2.bind("<Enter>",lambda event: hovered_over(event, "256GB", M4B2, 400+px1-10, 100,280,380)) 
+M4B2.bind("<Leave>",lambda event: not_hovered_over(event, "256GB", M4B2, 400+px1, 110,250,350))
+
+M4B3 = tk.Button(MEMPG4,image = mem4, command = lambda:search(512))
+M4B3.place(x = 800+px1, y = 110)
+M4B3.bind("<Enter>",lambda event: hovered_over(event, "512GB", M4B3, 800+px1-10, 100,280,380)) 
+M4B3.bind("<Leave>",lambda event: not_hovered_over(event, "512GB", M4B3,800+px1, 110,250,350))
+
+
+#(1,5)
+M5B1 = tk.Button(MEMPG5,image = mem2, command = lambda:search(128))
+M5B1.place(x = 0+px3, y = 110)
+M5B1.bind("<Enter>",lambda event: hovered_over(event, "128GB", M5B1, px3-10, 100,280,380)) 
+M5B1.bind("<Leave>",lambda event: not_hovered_over(event, "128GB", M5B1, 0+px3, 110,250,350))
+
+M5B2 = tk.Button(MEMPG5,image = mem3, command = lambda:search(256))
+M5B2.place(x = 300+px3, y = 110)
+M5B2.bind("<Enter>",lambda event: hovered_over(event, "256GB", M5B2, 300+px3-10, 100,280,380)) 
+M5B2.bind("<Leave>",lambda event: not_hovered_over(event, "256GB", M5B2, 300+px3, 110,250,350))
+
+M5B3 = tk.Button(MEMPG5,image = mem4, command = lambda:search(512))
+M5B3.place(x = 600+px3, y = 110)
+M5B3.bind("<Enter>",lambda event: hovered_over(event, "512GB", M5B3, 600+px3-10, 100,280,380)) 
+M5B3.bind("<Leave>",lambda event: not_hovered_over(event, "512GB", M5B3, 600+px3, 110,250,350))
+
+M5B4 = tk.Button(MEMPG5,image = mem5, command = lambda:search(1))
+M5B4.place(x = 900+px3, y = 110)
+M5B4.bind("<Enter>",lambda event: hovered_over(event, "1TB", M5B4, 900+px3-10, 100,280,380)) 
+M5B4.bind("<Leave>",lambda event: not_hovered_over(event, "1TB", M5B4, 900+px3, 110,250,350))
 
 
 
