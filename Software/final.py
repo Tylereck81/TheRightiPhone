@@ -8,6 +8,7 @@
 from ast import Mod
 from ctypes import resize
 from operator import mod
+from re import S
 from telnetlib import IP
 import tkinter as tk
 from tkinter import PhotoImage, ttk
@@ -98,7 +99,12 @@ def fix_price(p):
     return int(l)
 
 
-def search_apple(n,t,m): 
+def search_apple(n,t,m):
+    global location 
+    global prices 
+    global links 
+    global name_on_web
+
     #Format the string for search in the url
     name = n.split(" ")
     s = ""
@@ -151,6 +157,8 @@ def search_apple(n,t,m):
 
         name_on_web.append(keyword)
 
+        browser.quit()
+
 
     elif (n == "iPhone 12" and t!="Pro" and t!= "Pro Max") or (n=="iPhone 13" and t!="Pro" and t!="Pro Max"): 
         #opens browser to the weather 
@@ -196,6 +204,8 @@ def search_apple(n,t,m):
             keyword = n+" "+t+" "+m
 
         name_on_web.append(keyword)
+
+        browser.quit()
     
     elif n=="iPhone 13" and (t == "Pro" or t=="Pro Max"):
         #opens browser to the weather 
@@ -243,10 +253,17 @@ def search_apple(n,t,m):
 
         name_on_web.append(keyword)
 
+        browser.quit()
+
     else: 
         print("None")
 
 def search_pchome(name,model,memory): 
+
+    global location 
+    global prices 
+    global links 
+    global name_on_web
 
     #Search PCHome
     url = "https://shopping.pchome.com.tw/"
@@ -308,7 +325,6 @@ def search_pchome(name,model,memory):
     for i in str_prices:
         P_L.append(fix_price(i))
     
-
     
     time.sleep(4)
 
@@ -316,6 +332,7 @@ def search_pchome(name,model,memory):
     #items in order to see if it matches with requested iphone specs
     real_names, real_prices,real_links = get_real_lists(str_names,P_L,links,name,model,memory)
 
+    browser.quit()
 
     for i in range(len(real_names)):
         name_on_web.append(real_names[i])
@@ -325,6 +342,11 @@ def search_pchome(name,model,memory):
 
 
 def search_studioA(name,model,memory): 
+
+    global location 
+    global prices 
+    global links 
+    global name_on_web
     
     #search Studio A - short iphone section because it is limited
     url = "https://www.studioa.com.tw/categories/iphone?sort_by=lowest_price&order_by=desc"
@@ -357,7 +379,7 @@ def search_studioA(name,model,memory):
     #items in order to see if it matches with requested iphone specs
     real_names, real_prices,real_links = get_real_lists(str_names,price_real,links,name,model,memory)
 
-
+    browser.quit()
     for i in range(len(real_names)):
         name_on_web.append(real_names[i])
         prices.append(real_prices[i])
@@ -471,7 +493,31 @@ def go_to_storage(SEL_MODEL, s):
 def search(l): 
     global SEARCH_NAME
     global SEARCH_MODEL
-    print(SEARCH_NAME+" "+ SEARCH_MODEL+" "+str(l))
+    global SEARCH_STORAGE
+
+    if l == 1: 
+        SEARCH_STORAGE = "1TB"
+    else: 
+        SEARCH_STORAGE = str(l)+"GB"
+
+    search_apple(SEARCH_NAME,SEARCH_MODEL,SEARCH_STORAGE)
+    search_pchome(SEARCH_NAME,SEARCH_MODEL,SEARCH_STORAGE)
+    search_studioA(SEARCH_NAME,SEARCH_MODEL,SEARCH_STORAGE)
+
+    dict = { 
+        "Name on Web":name_on_web,
+        "Location":location, 
+        "Price":prices,
+        "Link":link
+    }
+    
+
+    df = pd.DataFrame(dict) 
+
+    df = df.sort_values(by=['Price'])
+    df2 = df.reset_index(drop=True)
+    print(df2)
+    
 
 #Function to switch between frames 
 def show_frame(frame): 
@@ -797,8 +843,6 @@ M5B4 = tk.Button(MEMPG5,image = mem5, command = lambda:search(1))
 M5B4.place(x = 900+px3, y = 110)
 M5B4.bind("<Enter>",lambda event: hovered_over(event, "1TB", M5B4, 900+px3-10, 100,280,380)) 
 M5B4.bind("<Leave>",lambda event: not_hovered_over(event, "1TB", M5B4, 900+px3, 110,250,350))
-
-
 
 
 
