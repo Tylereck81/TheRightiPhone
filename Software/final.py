@@ -11,7 +11,7 @@ from operator import mod
 from re import S
 from telnetlib import IP
 import tkinter as tk
-from tkinter import PhotoImage, ttk
+from tkinter import Frame, PhotoImage, ttk
 from tkinter import messagebox
 import threading
 from PIL import Image,ImageTk
@@ -114,7 +114,7 @@ def fix_price(p):
 def search_apple(n,t,m):
     global location 
     global prices 
-    global links 
+    global link
     global name_on_web
     global R1 
 
@@ -280,7 +280,7 @@ def search_pchome(name,model,memory):
 
     global location 
     global prices 
-    global links 
+    global link
     global name_on_web
     global R2 
 
@@ -366,7 +366,7 @@ def search_studioA(name,model,memory):
 
     global location 
     global prices 
-    global links 
+    global link
     global name_on_web
     global R3 
     
@@ -546,6 +546,32 @@ def check_data():
             R1 = 0 
             R2 = 0 
             R3 = 0 
+
+            dict = { 
+                "Name on Web":name_on_web,
+                "Location":location,
+                "Price":prices,
+                "Link":link
+            }
+
+            df = pd.DataFrame(dict) 
+
+            df = df.sort_values(by=['Price'])
+            df2 = df.reset_index(drop=True)
+            print(df2)
+
+            tv1["column"] = list(df2.columns)
+            tv1["show"] = "headings"
+            for column in tv1["columns"]:
+                tv1.heading(column,text = column)
+            
+            df_rows = df.to_numpy().tolist()
+            for row in df_rows: 
+                tv1.insert("","end",values=row)
+            
+
+
+
             break
 
 def start_search(): 
@@ -555,10 +581,10 @@ def start_search():
     t1 = threading.Thread(target = search_apple, args =(SEARCH_NAME,SEARCH_MODEL,SEARCH_STORAGE),daemon=True) 
     t1.start()
 
-    # t2 = threading.Thread(target = search_pchome, args =(SEARCH_NAME,SEARCH_MODEL,SEARCH_STORAGE),daemon=True) 
-    # t2.start()
-    global R2 
-    R2 = 1
+    t2 = threading.Thread(target = search_pchome, args =(SEARCH_NAME,SEARCH_MODEL,SEARCH_STORAGE),daemon=True) 
+    t2.start()
+    # global R2 
+    # R2 = 1
 
     t3 = threading.Thread(target = search_studioA, args =(SEARCH_NAME,SEARCH_MODEL,SEARCH_STORAGE),daemon=True) 
     t3.start()
@@ -693,7 +719,7 @@ StorageSelection.place(x = 0, y = 0)
 InstructionScreen = tk.Frame(root,width = 1200, height = 700)
 InstructionScreen.place(x = 0, y = 0)
 
-DataScreen = tk.Frame(root,width = 1200, height = 700, bg = "blue")
+DataScreen = tk.Frame(root,width = 1200, height = 700)
 DataScreen.place(x = 0, y = 0)
 
 #when we start the program, the iPhoneSelection Screen should show first
@@ -1005,6 +1031,20 @@ Back_Button.place(x = 1110, y = 10)
 
 Search = ttk.Button(InstructionScreen,text="Search", style = "Accentbutton",command = start_search) 
 Search.place(x = 950, y = 600)
+
+
+###################### FIFTH PAGE - DATA SCREEN ########################
+DATA_VIEW = tk.LabelFrame(DataScreen,text = "Data")
+DATA_VIEW.place(x = 100, y = 50, height = 300, width = 700)
+tv1 = ttk.Treeview(DATA_VIEW,height = 10)
+tv1.place(relheight=1, relwidth=1)
+
+treescrolly = tk.Scrollbar(DATA_VIEW, orient = "vertical", command = tv1.yview)
+treescrollx = tk.Scrollbar(DATA_VIEW, orient = "horizontal", command = tv1.xview)
+tv1.configure(xscrollcommand=treescrollx.set, yscrollcommand=treescrolly.set)
+treescrollx.pack(side= "bottom", fill = "x") 
+treescrolly.pack(side = "right", fill ="y")
+
 
 def main():
 
