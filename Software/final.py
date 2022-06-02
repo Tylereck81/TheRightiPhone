@@ -528,6 +528,9 @@ def search(l):
         SEARCH_STORAGE = str(l)+"GB"
     
     Search_Label.config(text = SEARCH_NAME+" "+SEARCH_MODEL+" "+SEARCH_STORAGE)
+    NAME_Label.config(text = SEARCH_NAME)
+    MODEL_Label.config(text = SEARCH_MODEL)
+    STORAGE_Label.config(text = SEARCH_STORAGE)
     show_frame(InstructionScreen)
 
 
@@ -664,6 +667,8 @@ iPhone13_Pro_Max = resize_image('Pictures/iPhone13_Pro_Max.png',280,380)
 iPhone13_Mini = resize_image('Pictures/iPhone13_Mini.png',220,320)
 
 iPhoneSE_Regular = resize_image('Pictures/iPhoneSE_Regular.png',250,350)
+
+Instructions = resize_image('Pictures/Instructions.png',900,300)
 
 mem1 = resize_image('Pictures/64GB.png',250,350)
 mem2 = resize_image('Pictures/128GB.png',250,350)
@@ -968,14 +973,38 @@ M5B4.bind("<Leave>",lambda event: not_hovered_over(event, "1TB", M5B4, 900+px3, 
 s = SEARCH_NAME+SEARCH_MODEL+SEARCH_STORAGE 
 Instruction_Label = tk.Label(InstructionScreen, text = "Instructions ",font = ("Arial", 50))
 Instruction_Label.place(x = 420, y = 30)
-Search_Label = tk.Label(InstructionScreen, text = s , font = ("Arial", 25))
-Search_Label.place(x = 400 , y = 500)
+
+Instructions_L = tk.Label(InstructionScreen, image = Instructions)
+Instructions_L.place(x = 150, y = 350)
+
+yy = 140
+xx = 100
+L1 = tk.Label(InstructionScreen, text = "iPhone Name:", font = ("Arial", 20))
+L1.place(x = 300+xx, y = 0+yy)
+NAME_Label = tk.Label(InstructionScreen, text = SEARCH_NAME , font = ("Arial", 20))
+NAME_Label.place(x = 550+xx , y = 0+yy)
+
+L2 = tk.Label(InstructionScreen, text = "iPhone Model:", font = ("Arial", 20))
+L2.place(x = 300+xx, y = 50+yy)
+MODEL_Label = tk.Label(InstructionScreen, text = SEARCH_MODEL , font = ("Arial", 20))
+MODEL_Label.place(x = 550+xx , y = 50+yy)
+
+L3 = tk.Label(InstructionScreen, text = "iPhone Storage:", font = ("Arial", 20))
+L3.place(x = 280+xx, y = 100+yy)
+STORAGE_Label = tk.Label(InstructionScreen, text = SEARCH_STORAGE , font = ("Arial", 20))
+STORAGE_Label.place(x = 550+xx , y = 100+yy)
+
+L4 = tk.Label(InstructionScreen, text = "Search Text:", font = ("Arial", 20))
+L4.place(x = 320+xx, y = 150+yy)
+Search_Label = tk.Label(InstructionScreen, text = s, font = ("Arial", 20))
+Search_Label.place(x = 550+xx, y = 150+yy)
+
 
 Back_Button = ttk.Button(InstructionScreen, text = "Back", style = "Accentbutton",command = lambda:goback(3))
 Back_Button.place(x = 1110, y = 10)
 
 Search = ttk.Button(InstructionScreen,text="Search", style = "Accentbutton",command = start_search) 
-Search.place(x = 550, y = 600)
+Search.place(x = 950, y = 600)
 
 def main():
 
