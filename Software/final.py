@@ -32,10 +32,22 @@ location = []
 prices = [] 
 link = []
 name_on_web = [] 
+menu_flow = []
 
 SEARCH_NAME = ""
+n_v = 0
 SEARCH_MODEL = "" 
+s_v = (0,0)
 SEARCH_STORAGE = ""
+st_v = 0
+
+#recieved flags to indicate when the values are available for writing into tkinter
+global R1 
+R1 = 0 
+global R2 
+R2 = 0 
+global R3
+R3 = 0 
 
 
 n = ["iPhone 11", "iPhone 12", "iPhone 13","iPhone SE"]
@@ -104,6 +116,7 @@ def search_apple(n,t,m):
     global prices 
     global links 
     global name_on_web
+    global R1 
 
     #Format the string for search in the url
     name = n.split(" ")
@@ -122,6 +135,7 @@ def search_apple(n,t,m):
     #For others, order is model -> color selection ->memeory ->no 
     #Select the year
     if (n == "iPhone 11" and t!= "Pro" and t!="Pro Max") or n == "iPhone SE":
+
         #opens browser to the weather 
         browser = webdriver.Chrome(executable_path = driverPath)
         browser.get(url)
@@ -158,6 +172,7 @@ def search_apple(n,t,m):
         name_on_web.append(keyword)
 
         browser.quit()
+        R1 = 1
 
 
     elif (n == "iPhone 12" and t!="Pro" and t!= "Pro Max") or (n=="iPhone 13" and t!="Pro" and t!="Pro Max"): 
@@ -206,6 +221,7 @@ def search_apple(n,t,m):
         name_on_web.append(keyword)
 
         browser.quit()
+        R1 = 1
     
     elif n=="iPhone 13" and (t == "Pro" or t=="Pro Max"):
         #opens browser to the weather 
@@ -254,9 +270,11 @@ def search_apple(n,t,m):
         name_on_web.append(keyword)
 
         browser.quit()
+        R1 = 1
 
     else: 
         print("None")
+        R1 = 1
 
 def search_pchome(name,model,memory): 
 
@@ -264,6 +282,7 @@ def search_pchome(name,model,memory):
     global prices 
     global links 
     global name_on_web
+    global R2 
 
     #Search PCHome
     url = "https://shopping.pchome.com.tw/"
@@ -309,6 +328,7 @@ def search_pchome(name,model,memory):
         if n_h == p_h: #if we reach the bottom then we stop 
             break
         p_h = n_h #let previous height equal new height (continously scrolls until we hit bottom)
+        print("Scrolling")
 
         
     url = browser.current_url
@@ -325,14 +345,14 @@ def search_pchome(name,model,memory):
     for i in str_prices:
         P_L.append(fix_price(i))
     
+    browser.quit()
     
-    time.sleep(4)
+    
+    time.sleep(2)
 
     #The filtering on PChome is not so great, therefore I will need to manually check 
     #items in order to see if it matches with requested iphone specs
     real_names, real_prices,real_links = get_real_lists(str_names,P_L,links,name,model,memory)
-
-    browser.quit()
 
     for i in range(len(real_names)):
         name_on_web.append(real_names[i])
@@ -340,6 +360,7 @@ def search_pchome(name,model,memory):
         link.append(real_links[i])
         location.append("PCHome")
 
+    R2 = 1
 
 def search_studioA(name,model,memory): 
 
@@ -347,6 +368,7 @@ def search_studioA(name,model,memory):
     global prices 
     global links 
     global name_on_web
+    global R3 
     
     #search Studio A - short iphone section because it is limited
     url = "https://www.studioa.com.tw/categories/iphone?sort_by=lowest_price&order_by=desc"
@@ -354,7 +376,7 @@ def search_studioA(name,model,memory):
     #opens browser to the weather 
     browser = webdriver.Chrome(executable_path = driverPath)
     browser.get(url)
-    time.sleep(4)
+    time.sleep(2)
 
     names = browser.find_elements_by_xpath("//div[@class='title text-primary-color title-container ellipsis ']")
     price_l = browser.find_elements_by_xpath("//div[@class='quick-cart-price']")
@@ -386,7 +408,7 @@ def search_studioA(name,model,memory):
         link.append(real_links[i])
         location.append("Studio A")
     
-        
+    R3 = 1    
 
 def model_select(n):
     MODELS = []
@@ -440,6 +462,8 @@ def not_hovered_over(e,imgname, but,locx,locy,hovx,hovy):
 
 def go_to_model(name):
     global SEARCH_NAME
+    global n_v
+    n_v = name
     show_frame(ModelSelection)
     if name == 1: 
         show_frame(iPhone11_MODEL_FRAME)
@@ -460,8 +484,9 @@ def go_to_model(name):
 
 def go_to_storage(SEL_MODEL, s):
     show_frame(StorageSelection)
-
+    global s_v 
     global SEARCH_NAME
+    s_v = (SEL_MODEL, s)
     global SEARCH_MODEL
     SEARCH_MODEL = m[SEL_MODEL-1]
     model = SEL_MODEL-1
@@ -494,34 +519,78 @@ def search(l):
     global SEARCH_NAME
     global SEARCH_MODEL
     global SEARCH_STORAGE
+    global st_v
+    st_v = l
 
     if l == 1: 
         SEARCH_STORAGE = "1TB"
     else: 
         SEARCH_STORAGE = str(l)+"GB"
-
-    search_apple(SEARCH_NAME,SEARCH_MODEL,SEARCH_STORAGE)
-    search_pchome(SEARCH_NAME,SEARCH_MODEL,SEARCH_STORAGE)
-    search_studioA(SEARCH_NAME,SEARCH_MODEL,SEARCH_STORAGE)
-
-    dict = { 
-        "Name on Web":name_on_web,
-        "Location":location, 
-        "Price":prices,
-        "Link":link
-    }
     
+    Search_Label.config(text = SEARCH_NAME+" "+SEARCH_MODEL+" "+SEARCH_STORAGE)
+    show_frame(InstructionScreen)
 
-    df = pd.DataFrame(dict) 
-
-    df = df.sort_values(by=['Price'])
-    df2 = df.reset_index(drop=True)
-    print(df2)
-    
 
 #Function to switch between frames 
 def show_frame(frame): 
     frame.tkraise()
+
+def check_data(): 
+    global R1,R2,R3 
+    while True:
+        if R1 == 1 and R2 == 1 and R3 == 1:
+            show_frame(DataScreen)
+            R1 = 0 
+            R2 = 0 
+            R3 = 0 
+            break
+
+def start_search(): 
+    CD = threading.Thread(target = check_data,daemon=True) 
+    CD.start()
+
+    t1 = threading.Thread(target = search_apple, args =(SEARCH_NAME,SEARCH_MODEL,SEARCH_STORAGE),daemon=True) 
+    t1.start()
+
+    # t2 = threading.Thread(target = search_pchome, args =(SEARCH_NAME,SEARCH_MODEL,SEARCH_STORAGE),daemon=True) 
+    # t2.start()
+    global R2 
+    R2 = 1
+
+    t3 = threading.Thread(target = search_studioA, args =(SEARCH_NAME,SEARCH_MODEL,SEARCH_STORAGE),daemon=True) 
+    t3.start()
+
+def goback(i):
+    global n_v 
+    global s_v
+    global st_v
+    global SEARCH_NAME
+    global SEARCH_MODEL
+    global SEARCH_STORAGE
+
+    if i == 1: #switching to iphone selection screen
+        print(n_v)
+        n_v = 0
+        SEARCH_NAME = ""
+        show_frame(iPhoneSelection)
+    elif i == 2:
+        print(s_v)
+        s_v = (0,0)
+        SEARCH_MODEL = ""
+        go_to_model(n_v)
+    elif i == 3: 
+        print(st_v)
+        st_v = 0
+        x,y = s_v
+        SEARCH_STORAGE = ""
+        go_to_storage(x,y)
+
+    print("####### START #########")
+    print(SEARCH_NAME) 
+    print(SEARCH_MODEL)
+    print(SEARCH_STORAGE)
+    print("####### END ###########")
+
 
 #MAINN
 # name = iphone_select()
@@ -543,7 +612,8 @@ def show_frame(frame):
 
 # dict = { 
 #     "Name on Web":name_on_web,
-#     "Location":location, 
+#     "Location
+# ":location, 
 #     "Price":prices,
 #     "Link":link
 # }
@@ -574,7 +644,6 @@ style.theme_use('azure')
 
 
 # Importing the Pictures used in the program as visual aid and resizing them to be the same size
-TITLE = resize_image('Pictures/TITLE.png',1200,90)
 iPhone11 = resize_image('Pictures/iPhone11.png',250,350)
 iPhone12 = resize_image('Pictures/iPhone12.png',250,350)
 iPhone13 = resize_image('Pictures/iPhone13.png',250,350)
@@ -608,10 +677,6 @@ mem5 = resize_image('Pictures/1TB.png',250,350)
 iPhoneSelection = tk.Frame(root,width = 1200, height = 700)
 iPhoneSelection.place(x = 0, y = 0)
 
-
-TITLE = tk.Label(iPhoneSelection, image = TITLE) 
-TITLE.place(x = 0, y = 0)
-
 #FRAME 2 - MODEL SELECTION PAGE
 ModelSelection = tk.Frame(root,width = 1200, height = 700)
 ModelSelection.place(x = 0, y = 0)
@@ -619,6 +684,12 @@ ModelSelection.place(x = 0, y = 0)
 #FRAME 3 - STORAGE SELECTION PAGE
 StorageSelection = tk.Frame(root,width = 1200, height = 700)
 StorageSelection.place(x = 0, y = 0)
+
+InstructionScreen = tk.Frame(root,width = 1200, height = 700)
+InstructionScreen.place(x = 0, y = 0)
+
+DataScreen = tk.Frame(root,width = 1200, height = 700, bg = "blue")
+DataScreen.place(x = 0, y = 0)
 
 #when we start the program, the iPhoneSelection Screen should show first
 show_frame(iPhoneSelection)
@@ -635,6 +706,10 @@ ip11.place(x = 0, y = 110)
 ip12.place(x = 300, y = 110)
 ip13.place(x = 600, y = 110)
 ipse.place(x = 900, y = 110)
+
+Selection_Label = tk.Label(iPhoneSelection, text = "Select iPhone ",font = ("Arial", 50))
+Selection_Label.place(x = 380, y = 30)
+
 
 #Placing the images in their respective frames and binding the hovering option to them 
 iphone11 = tk.Button(ip11, image = iPhone11, command = lambda:go_to_model(1)) 
@@ -659,7 +734,6 @@ iphonese.bind("<Leave>",lambda event: not_hovered_over(event, "iPhoneSE", iphone
 
 ###################### SECOND PAGE - MODEL SELECTION SCREEN ########################
 
-
 iPhone11_MODEL_FRAME = tk.Frame(ModelSelection, width = 1200, height = 700)
 iPhone12_MODEL_FRAME = tk.Frame(ModelSelection, width = 1200, height = 700)
 iPhone13_MODEL_FRAME = tk.Frame(ModelSelection, width = 1200, height = 700)
@@ -668,6 +742,27 @@ iPhone11_MODEL_FRAME.place(x = 0, y = 0)
 iPhone12_MODEL_FRAME.place(x = 0, y = 0)
 iPhone13_MODEL_FRAME.place(x = 0, y = 0)
 iPhoneSE_MODEL_FRAME.place(x = 0, y = 0)
+
+Model_Label = tk.Label(iPhone11_MODEL_FRAME, text = "Select Model ",font = ("Arial", 50))
+Model_Label.place(x = 380, y = 10)
+Model_Label = tk.Label(iPhone12_MODEL_FRAME, text = "Select Model ",font = ("Arial", 50))
+Model_Label.place(x = 380, y = 10)
+Model_Label = tk.Label(iPhone13_MODEL_FRAME, text = "Select Model ",font = ("Arial", 50))
+Model_Label.place(x = 380, y = 10)
+Model_Label = tk.Label(iPhoneSE_MODEL_FRAME, text = "Select Model ",font = ("Arial", 50))
+Model_Label.place(x = 380, y = 10)
+
+Back_Button = ttk.Button(iPhone11_MODEL_FRAME, text = "Back", style = "Accentbutton",command = lambda:goback(1))
+Back_Button.place(x = 1110, y = 10)
+Back_Button = ttk.Button(iPhone12_MODEL_FRAME, text = "Back", style = "Accentbutton",command = lambda:goback(1))
+Back_Button.place(x = 1110, y = 10)
+Back_Button = ttk.Button(iPhone13_MODEL_FRAME, text = "Back", style = "Accentbutton",command = lambda:goback(1))
+Back_Button.place(x = 1110, y = 10)
+Back_Button = ttk.Button(iPhoneSE_MODEL_FRAME, text = "Back", style = "Accentbutton",command = lambda:goback(1))
+Back_Button.place(x = 1110, y = 10)
+
+
+
 
 px1 = 60
 px2 = 20
@@ -755,100 +850,136 @@ MEMPG3.place(x = 0, y = 0)
 MEMPG4.place(x = 0, y = 0)
 MEMPG5.place(x = 0, y = 0)
 
+Back_Button = ttk.Button(MEMPG1, text = "Back", style = "Accentbutton",command = lambda:goback(2))
+Back_Button.place(x = 1110, y = 10)
+Back_Button = ttk.Button(MEMPG2, text = "Back", style = "Accentbutton",command = lambda:goback(2))
+Back_Button.place(x = 1110, y = 10)
+Back_Button = ttk.Button(MEMPG3, text = "Back", style = "Accentbutton",command = lambda:goback(2))
+Back_Button.place(x = 1110, y = 10)
+Back_Button = ttk.Button(MEMPG4, text = "Back", style = "Accentbutton",command = lambda:goback(2))
+Back_Button.place(x = 1110, y = 10)
+Back_Button = ttk.Button(MEMPG5, text = "Back", style = "Accentbutton",command = lambda:goback(2))
+Back_Button.place(x = 1110, y = 10)
+
+Storage_Label = tk.Label(MEMPG1, text = "Select Storage ",font = ("Arial", 50))
+Storage_Label.place(x = 380, y = 30)
+Storage_Label = tk.Label(MEMPG2, text = "Select Storage ",font = ("Arial", 50))
+Storage_Label.place(x = 380, y = 30)
+Storage_Label = tk.Label(MEMPG3, text = "Select Storage ",font = ("Arial", 50))
+Storage_Label.place(x = 380, y = 30)
+Storage_Label = tk.Label(MEMPG4, text = "Select Storage ",font = ("Arial", 50))
+Storage_Label.place(x = 380, y = 30)
+Storage_Label = tk.Label(MEMPG5, text = "Select Storage ",font = ("Arial", 50))
+Storage_Label.place(x = 380, y = 30)
+
+#used to change height of the storage buttons
+yx = 150
 
 #(0,2)
 M1B1 = tk.Button(MEMPG1,image = mem1, command = lambda:search(64))
-M1B1.place(x = 200+px1, y = 110)
-M1B1.bind("<Enter>",lambda event: hovered_over(event, "64GB", M1B1, 200+px1-10, 100,280,380)) 
-M1B1.bind("<Leave>",lambda event: not_hovered_over(event, "64GB", M1B1, 200+px1, 110,250,350))
+M1B1.place(x = 200+px1, y = yx)
+M1B1.bind("<Enter>",lambda event: hovered_over(event, "64GB", M1B1, 200+px1-10, yx-10,280,380)) 
+M1B1.bind("<Leave>",lambda event: not_hovered_over(event, "64GB", M1B1, 200+px1, yx,250,350))
 
 M1B2 = tk.Button(MEMPG1,image = mem2, command = lambda:search(128))
-M1B2.place(x = 600+px1, y = 110)
-M1B2.bind("<Enter>",lambda event: hovered_over(event, "128GB", M1B2, 600+px1-10, 100,280,380)) 
-M1B2.bind("<Leave>",lambda event: not_hovered_over(event, "128GB", M1B2, 600+px1, 110,250,350))
+M1B2.place(x = 600+px1, y = yx)
+M1B2.bind("<Enter>",lambda event: hovered_over(event, "128GB", M1B2, 600+px1-10, yx-10,280,380)) 
+M1B2.bind("<Leave>",lambda event: not_hovered_over(event, "128GB", M1B2, 600+px1, yx,250,350))
 
 
 #(0,3)
 M2B1 = tk.Button(MEMPG2,image = mem1, command = lambda:search(64))
-M2B1.place(x = 0+px1, y = 110)
-M2B1.bind("<Enter>",lambda event: hovered_over(event, "64GB", M2B1, px1-10, 100,280,380)) 
-M2B1.bind("<Leave>",lambda event: not_hovered_over(event, "64GB", M2B1, 0+px1, 110,250,350))
+M2B1.place(x = 0+px1, y = yx)
+M2B1.bind("<Enter>",lambda event: hovered_over(event, "64GB", M2B1, px1-10, yx-10,280,380)) 
+M2B1.bind("<Leave>",lambda event: not_hovered_over(event, "64GB", M2B1, 0+px1, yx,250,350))
 
 M2B2 = tk.Button(MEMPG2,image = mem2, command = lambda:search(128))
-M2B2.place(x = 400+px1, y = 110)
-M2B2.bind("<Enter>",lambda event: hovered_over(event, "128GB", M2B2, 400+px1-10, 100,280,380)) 
-M2B2.bind("<Leave>",lambda event: not_hovered_over(event, "128GB", M2B2, 400+px1, 110,250,350))
+M2B2.place(x = 400+px1, y = yx)
+M2B2.bind("<Enter>",lambda event: hovered_over(event, "128GB", M2B2, 400+px1-10, yx-10,280,380)) 
+M2B2.bind("<Leave>",lambda event: not_hovered_over(event, "128GB", M2B2, 400+px1, yx,250,350))
 
 M2B3 = tk.Button(MEMPG2,image = mem3, command = lambda:search(256))
-M2B3.place(x = 800+px1, y = 110)
-M2B3.bind("<Enter>",lambda event: hovered_over(event, "256GB", M2B3, 800+px1-10, 100,280,380)) 
-M2B3.bind("<Leave>",lambda event: not_hovered_over(event, "256GB", M2B3,800+px1, 110,250,350))
+M2B3.place(x = 800+px1, y = yx)
+M2B3.bind("<Enter>",lambda event: hovered_over(event, "256GB", M2B3, 800+px1-10, yx-10,280,380)) 
+M2B3.bind("<Leave>",lambda event: not_hovered_over(event, "256GB", M2B3,800+px1, yx,250,350))
 
 #(0,4)
 M3B1 = tk.Button(MEMPG3,image = mem1, command = lambda:search(64))
-M3B1.place(x = 0+px3, y = 110)
-M3B1.bind("<Enter>",lambda event: hovered_over(event, "64GB", M3B1, px3-10, 100,280,380)) 
-M3B1.bind("<Leave>",lambda event: not_hovered_over(event, "64GB", M3B1, 0+px3, 110,250,350))
+M3B1.place(x = 0+px3, y = yx)
+M3B1.bind("<Enter>",lambda event: hovered_over(event, "64GB", M3B1, px3-10, yx-10,280,380)) 
+M3B1.bind("<Leave>",lambda event: not_hovered_over(event, "64GB", M3B1, 0+px3, yx,250,350))
 
 M3B2 = tk.Button(MEMPG3,image = mem2, command = lambda:search(128))
-M3B2.place(x = 300+px3, y = 110)
-M3B2.bind("<Enter>",lambda event: hovered_over(event, "128GB", M3B2, 300+px3-10, 100,280,380)) 
-M3B2.bind("<Leave>",lambda event: not_hovered_over(event, "128GB", M3B2, 300+px3, 110,250,350))
+M3B2.place(x = 300+px3, y = yx)
+M3B2.bind("<Enter>",lambda event: hovered_over(event, "128GB", M3B2, 300+px3-10, yx-10,280,380)) 
+M3B2.bind("<Leave>",lambda event: not_hovered_over(event, "128GB", M3B2, 300+px3, yx,250,350))
 
 M3B3 = tk.Button(MEMPG3,image = mem3, command = lambda:search(256))
-M3B3.place(x = 600+px3, y = 110)
-M3B3.bind("<Enter>",lambda event: hovered_over(event, "256GB", M3B3, 600+px3-10, 100,280,380)) 
-M3B3.bind("<Leave>",lambda event: not_hovered_over(event, "256GB", M3B3, 600+px3, 110,250,350))
+M3B3.place(x = 600+px3, y = yx)
+M3B3.bind("<Enter>",lambda event: hovered_over(event, "256GB", M3B3, 600+px3-10, yx-10,280,380)) 
+M3B3.bind("<Leave>",lambda event: not_hovered_over(event, "256GB", M3B3, 600+px3, yx,250,350))
 
 M3B4 = tk.Button(MEMPG3,image = mem4, command = lambda:search(512))
-M3B4.place(x = 900+px3, y = 110)
-M3B4.bind("<Enter>",lambda event: hovered_over(event, "512GB", M3B4, 900+px3-10, 100,280,380)) 
-M3B4.bind("<Leave>",lambda event: not_hovered_over(event, "512GB", M3B4, 900+px3, 110,250,350))
+M3B4.place(x = 900+px3, y = yx)
+M3B4.bind("<Enter>",lambda event: hovered_over(event, "512GB", M3B4, 900+px3-10, yx-10,280,380)) 
+M3B4.bind("<Leave>",lambda event: not_hovered_over(event, "512GB", M3B4, 900+px3, yx,250,350))
 
 
 #(1,4)
 M4B1 = tk.Button(MEMPG4,image = mem2, command = lambda:search(128))
-M4B1.place(x = 0+px1, y = 110)
-M4B1.bind("<Enter>",lambda event: hovered_over(event, "128GB", M4B1, px1-10, 100,280,380)) 
-M4B1.bind("<Leave>",lambda event: not_hovered_over(event, "128GB", M4B1, 0+px1, 110,250,350))
+M4B1.place(x = 0+px1, y = yx)
+M4B1.bind("<Enter>",lambda event: hovered_over(event, "128GB", M4B1, px1-10, yx-10,280,380)) 
+M4B1.bind("<Leave>",lambda event: not_hovered_over(event, "128GB", M4B1, 0+px1, yx,250,350))
 
 M4B2 = tk.Button(MEMPG4,image = mem3, command = lambda:search(256))
-M4B2.place(x = 400+px1, y = 110)
-M4B2.bind("<Enter>",lambda event: hovered_over(event, "256GB", M4B2, 400+px1-10, 100,280,380)) 
-M4B2.bind("<Leave>",lambda event: not_hovered_over(event, "256GB", M4B2, 400+px1, 110,250,350))
+M4B2.place(x = 400+px1, y = yx)
+M4B2.bind("<Enter>",lambda event: hovered_over(event, "256GB", M4B2, 400+px1-10, yx-10,280,380)) 
+M4B2.bind("<Leave>",lambda event: not_hovered_over(event, "256GB", M4B2, 400+px1, yx,250,350))
 
 M4B3 = tk.Button(MEMPG4,image = mem4, command = lambda:search(512))
-M4B3.place(x = 800+px1, y = 110)
-M4B3.bind("<Enter>",lambda event: hovered_over(event, "512GB", M4B3, 800+px1-10, 100,280,380)) 
-M4B3.bind("<Leave>",lambda event: not_hovered_over(event, "512GB", M4B3,800+px1, 110,250,350))
+M4B3.place(x = 800+px1, y = yx)
+M4B3.bind("<Enter>",lambda event: hovered_over(event, "512GB", M4B3, 800+px1-10, yx-10,280,380)) 
+M4B3.bind("<Leave>",lambda event: not_hovered_over(event, "512GB", M4B3,800+px1, yx,250,350))
 
 
 #(1,5)
 M5B1 = tk.Button(MEMPG5,image = mem2, command = lambda:search(128))
-M5B1.place(x = 0+px3, y = 110)
-M5B1.bind("<Enter>",lambda event: hovered_over(event, "128GB", M5B1, px3-10, 100,280,380)) 
-M5B1.bind("<Leave>",lambda event: not_hovered_over(event, "128GB", M5B1, 0+px3, 110,250,350))
+M5B1.place(x = 0+px3, y = yx)
+M5B1.bind("<Enter>",lambda event: hovered_over(event, "128GB", M5B1, px3-10, yx-10,280,380)) 
+M5B1.bind("<Leave>",lambda event: not_hovered_over(event, "128GB", M5B1, 0+px3, yx,250,350))
 
 M5B2 = tk.Button(MEMPG5,image = mem3, command = lambda:search(256))
-M5B2.place(x = 300+px3, y = 110)
-M5B2.bind("<Enter>",lambda event: hovered_over(event, "256GB", M5B2, 300+px3-10, 100,280,380)) 
-M5B2.bind("<Leave>",lambda event: not_hovered_over(event, "256GB", M5B2, 300+px3, 110,250,350))
+M5B2.place(x = 300+px3, y = yx)
+M5B2.bind("<Enter>",lambda event: hovered_over(event, "256GB", M5B2, 300+px3-10, yx-10,280,380)) 
+M5B2.bind("<Leave>",lambda event: not_hovered_over(event, "256GB", M5B2, 300+px3, yx,250,350))
 
 M5B3 = tk.Button(MEMPG5,image = mem4, command = lambda:search(512))
-M5B3.place(x = 600+px3, y = 110)
-M5B3.bind("<Enter>",lambda event: hovered_over(event, "512GB", M5B3, 600+px3-10, 100,280,380)) 
-M5B3.bind("<Leave>",lambda event: not_hovered_over(event, "512GB", M5B3, 600+px3, 110,250,350))
+M5B3.place(x = 600+px3, y = yx)
+M5B3.bind("<Enter>",lambda event: hovered_over(event, "512GB", M5B3, 600+px3-10, yx-10,280,380)) 
+M5B3.bind("<Leave>",lambda event: not_hovered_over(event, "512GB", M5B3, 600+px3, yx,250,350))
 
 M5B4 = tk.Button(MEMPG5,image = mem5, command = lambda:search(1))
-M5B4.place(x = 900+px3, y = 110)
-M5B4.bind("<Enter>",lambda event: hovered_over(event, "1TB", M5B4, 900+px3-10, 100,280,380)) 
-M5B4.bind("<Leave>",lambda event: not_hovered_over(event, "1TB", M5B4, 900+px3, 110,250,350))
+M5B4.place(x = 900+px3, y = yx)
+M5B4.bind("<Enter>",lambda event: hovered_over(event, "1TB", M5B4, 900+px3-10, yx-10,280,380)) 
+M5B4.bind("<Leave>",lambda event: not_hovered_over(event, "1TB", M5B4, 900+px3, yx,250,350))
 
 
+###################### FOURTH PAGE - INSTRUCTIONS SCREEN ########################
+s = SEARCH_NAME+SEARCH_MODEL+SEARCH_STORAGE 
+Instruction_Label = tk.Label(InstructionScreen, text = "Instructions ",font = ("Arial", 50))
+Instruction_Label.place(x = 420, y = 30)
+Search_Label = tk.Label(InstructionScreen, text = s , font = ("Arial", 25))
+Search_Label.place(x = 400 , y = 500)
+
+Back_Button = ttk.Button(InstructionScreen, text = "Back", style = "Accentbutton",command = lambda:goback(3))
+Back_Button.place(x = 1110, y = 10)
+
+Search = ttk.Button(InstructionScreen,text="Search", style = "Accentbutton",command = start_search) 
+Search.place(x = 550, y = 600)
 
 def main():
 
-     root.mainloop()
+    root.mainloop()
 
 if __name__ == "__main__": 
     main()
