@@ -583,8 +583,6 @@ def start_search():
 
     t2 = threading.Thread(target = search_pchome, args =(SEARCH_NAME,SEARCH_MODEL,SEARCH_STORAGE),daemon=True) 
     t2.start()
-    # global R2 
-    # R2 = 1
 
     t3 = threading.Thread(target = search_studioA, args =(SEARCH_NAME,SEARCH_MODEL,SEARCH_STORAGE),daemon=True) 
     t3.start()
@@ -804,18 +802,25 @@ ip11m1 = tk.Button(iPhone11_MODEL_FRAME,image = iPhone11_Regular, command = lamb
 ip11m1.place(x = 0+px1, y = 110)
 ip11m1.bind("<Enter>",lambda event: hovered_over(event, "iPhone11_Regular", ip11m1, px1-10, 100,280,380)) 
 ip11m1.bind("<Leave>",lambda event: not_hovered_over(event, "iPhone11_Regular", ip11m1, 0+px1, 110,250,350))
+ip11m1_L = tk.Label(iPhone11_MODEL_FRAME, text = "Regular ",font = ("Arial", 40))
+ip11m1_L.place(x = 0+px1+30, y = 500)
 
 
 ip11m2 = tk.Button (iPhone11_MODEL_FRAME, image = iPhone11_Pro, command = lambda:go_to_storage(2,3))
 ip11m2.place(x = 400+px1, y = 110)
 ip11m2.bind("<Enter>",lambda event: hovered_over(event, "iPhone11_Pro", ip11m2, 400+px1-10, 100,280,380)) 
 ip11m2.bind("<Leave>",lambda event: not_hovered_over(event, "iPhone11_Pro", ip11m2, 400+px1, 110,250,350))
+ip11m2_L = tk.Label(iPhone11_MODEL_FRAME, text = "Pro ",font = ("Arial", 40))
+ip11m2_L.place(x = 400+px1+80, y = 500)
 
 
 ip11m3 = tk.Button(iPhone11_MODEL_FRAME,image = iPhone11_Pro_Max, command = lambda:go_to_storage(3,3))
 ip11m3.place(x = 800+px1, y = 90)
 ip11m3.bind("<Enter>",lambda event: hovered_over(event, "iPhone11_Pro_Max", ip11m3, 800+px1-10, 100,300,400)) 
 ip11m3.bind("<Leave>",lambda event: not_hovered_over(event, "iPhone11_Pro_Max", ip11m3, 800+px1, 90,270,370))
+ip11m3_L = tk.Label(iPhone11_MODEL_FRAME, text = "Pro Max ",font = ("Arial", 40))
+ip11m3_L.place(x = 800+px1+30, y = 500)
+
 
 
 #Frames for iPhone 12 Models 
@@ -823,22 +828,30 @@ ip12m1 = tk.Button(iPhone12_MODEL_FRAME,image = iPhone12_Regular, command = lamb
 ip12m1.place(x = 0+px2, y = 110)
 ip12m1.bind("<Enter>",lambda event: hovered_over(event, "iPhone12_Regular", ip12m1, px2-10, 100,280,380)) 
 ip12m1.bind("<Leave>",lambda event: not_hovered_over(event, "iPhone12_Regular", ip12m1, 0+px2, 110,250,350))
+ip12m1_L = tk.Label(iPhone12_MODEL_FRAME, text = "Regular ",font = ("Arial", 40))
+ip12m1_L.place(x = 0+px2+35, y = 500)
 
 ip12m2 = tk.Button (iPhone12_MODEL_FRAME, image = iPhone12_Pro, command = lambda:go_to_storage(2,4))
 ip12m2.place(x = 300+px2, y = 110)
 ip12m2.bind("<Enter>",lambda event: hovered_over(event, "iPhone12_Pro", ip12m2, 300+px2-10, 100,280,380)) 
 ip12m2.bind("<Leave>",lambda event: not_hovered_over(event, "iPhone12_Pro", ip12m2, 300+px2, 110,250,350))
+ip12m2_L = tk.Label(iPhone12_MODEL_FRAME, text = "Pro ",font = ("Arial", 40))
+ip12m2_L.place(x = 300+px2+80, y = 500)
 
 ip12m3 = tk.Button(iPhone12_MODEL_FRAME,image = iPhone12_Pro_Max, command = lambda:go_to_storage(3,4))
 ip12m3.place(x = 600+px2, y = 90)
 ip12m3.bind("<Enter>",lambda event: hovered_over(event, "iPhone12_Pro_Max", ip12m3, 600+px2-10, 100,300,400))
 ip12m3.bind("<Leave>",lambda event: not_hovered_over(event, "iPhone12_Pro_Max", ip12m3, 600+px2, 90,270,370))
-
+ip12m3_L = tk.Label(iPhone12_MODEL_FRAME, text = "Pro Max ",font = ("Arial", 40))
+ip12m3_L.place(x = 600+px2+35, y = 500)
 
 ip12m4 = tk.Button(iPhone12_MODEL_FRAME,image = iPhone12_Mini, command = lambda:go_to_storage(4,2))
-ip12m4.place(x = 900+px2, y = 140)
-ip12m4.bind("<Enter>",lambda event: hovered_over(event, "iPhone12_Mini", ip12m4, 900+px2-10, 130,250,350)) 
-ip12m4.bind("<Leave>",lambda event: not_hovered_over(event, "iPhone12_Mini", ip12m4, 900+px2, 140,220,320))
+ip12m4.place(x = 900+px2+20, y = 140)
+ip12m4.bind("<Enter>",lambda event: hovered_over(event, "iPhone12_Mini", ip12m4, 900+px2-10+20, 130,250,350)) 
+ip12m4.bind("<Leave>",lambda event: not_hovered_over(event, "iPhone12_Mini", ip12m4, 900+px2+20, 140,220,320))
+ip12m4_L = tk.Label(iPhone12_MODEL_FRAME, text = "Mini ",font = ("Arial", 40))
+ip12m4_L.place(x = 900+px2+85, y = 500)
+
 
 
 #Frames for iPhone 13 Models 
@@ -846,27 +859,37 @@ ip13m1 = tk.Button(iPhone13_MODEL_FRAME,image = iPhone13_Regular, command = lamb
 ip13m1.place(x = 0+px3, y = 110)
 ip13m1.bind("<Enter>",lambda event: hovered_over(event, "iPhone13_Regular", ip13m1, px3-10, 100,280,380)) 
 ip13m1.bind("<Leave>",lambda event: not_hovered_over(event, "iPhone13_Regular", ip13m1, 0+px3, 110,250,350))
+ip13m1_L = tk.Label(iPhone13_MODEL_FRAME, text = "Regular ",font = ("Arial", 40))
+ip13m1_L.place(x = 0+px3+35, y = 500)
 
 ip13m2 = tk.Button (iPhone13_MODEL_FRAME, image = iPhone13_Pro, command = lambda:go_to_storage(2,5))
 ip13m2.place(x = 300+px3, y = 110)
 ip13m2.bind("<Enter>",lambda event: hovered_over(event, "iPhone13_Pro", ip13m2, 300+px3-10, 100,280,380)) 
 ip13m2.bind("<Leave>",lambda event: not_hovered_over(event, "iPhone13_Pro", ip13m2, 300+px3, 110,250,350))
+ip13m2_L = tk.Label(iPhone13_MODEL_FRAME, text = "Pro ",font = ("Arial", 40))
+ip13m2_L.place(x = 300+px3+80, y = 500)
 
 ip13m3 = tk.Button(iPhone13_MODEL_FRAME,image = iPhone13_Pro_Max, command = lambda:go_to_storage(3,5))
 ip13m3.place(x = 600+px3, y = 90)
 ip13m3.bind("<Enter>",lambda event: hovered_over(event, "iPhone13_Pro_Max", ip13m3, 600+px2-10, 100,300,400))
 ip13m3.bind("<Leave>",lambda event: not_hovered_over(event, "iPhone13_Pro_Max", ip13m3, 600+px2, 90,270,370))
+ip13m3_L = tk.Label(iPhone13_MODEL_FRAME, text = "Pro Max ",font = ("Arial", 40))
+ip13m3_L.place(x = 600+px3+35, y = 500)
 
 ip13m4 = tk.Button(iPhone13_MODEL_FRAME,image = iPhone13_Mini, command = lambda:go_to_storage(4,4))
-ip13m4.place(x = 900+px3, y = 140)
-ip13m4.bind("<Enter>",lambda event: hovered_over(event, "iPhone13_Mini", ip13m4, 900+px2-10, 130,250,350)) 
-ip13m4.bind("<Leave>",lambda event: not_hovered_over(event, "iPhone13_Mini", ip13m4, 900+px2, 140,220,320))
+ip13m4.place(x = 900+px3+20, y = 140)
+ip13m4.bind("<Enter>",lambda event: hovered_over(event, "iPhone13_Mini", ip13m4, 900+px2-10+20, 130,250,350)) 
+ip13m4.bind("<Leave>",lambda event: not_hovered_over(event, "iPhone13_Mini", ip13m4, 900+px2+20, 140,220,320))
+ip13m4_L = tk.Label(iPhone13_MODEL_FRAME, text = "Mini",font = ("Arial", 40))
+ip13m4_L.place(x = 900+px3+85, y = 500)
 
 #Frames for iPhone SE Models 
 ipsem1 = tk.Button(iPhoneSE_MODEL_FRAME,image = iPhoneSE_Regular, command = lambda:go_to_storage(1,2))
 ipsem1.place(x = 0+px4, y = 110)
 ipsem1.bind("<Enter>",lambda event: hovered_over(event, "iPhoneSE_Regular", ipsem1, px4-10, 100,280,380)) 
 ipsem1.bind("<Leave>",lambda event: not_hovered_over(event, "iPhoneSE_Regular", ipsem1, 0+px4, 110,250,350))
+ipsem1_L = tk.Label(iPhoneSE_MODEL_FRAME, text = "Regular",font = ("Arial", 40))
+ipsem1_L.place(x = px4+30, y = 500)
 
 ###################### THIRD PAGE - STORAGE SELECTION SCREEN ########################
 
