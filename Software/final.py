@@ -5,17 +5,13 @@
 
 
 #TKINTER 
-from ast import Mod
-from ctypes import resize
-from operator import mod
-from re import S
-from telnetlib import IP
 import tkinter as tk
 from tkinter import Frame, PhotoImage, ttk
 from tkinter import messagebox
 import threading
 from PIL import Image,ImageTk
 
+#Scraping
 import requests 
 import numpy as np 
 import pandas as pd
@@ -26,14 +22,18 @@ from selenium.webdriver.support.ui import Select
 import time 
 from selenium.webdriver.common.keys import Keys
 
+#driver path of the chromedriver
 driverPath = 'chromedriver.exe'
 
+
+#Main arrays used globally throughout the code 
 location = [] 
 prices = [] 
 link = []
 name_on_web = [] 
 menu_flow = []
 
+#Holds the previous values when user presses the back button 
 SEARCH_NAME = ""
 n_v = 0
 SEARCH_MODEL = "" 
@@ -49,10 +49,16 @@ R2 = 0
 global R3
 R3 = 0 
 
-
+#Main iphone types
 n = ["iPhone 11", "iPhone 12", "iPhone 13","iPhone SE"]
+
+#Model index for each type ex. iPhone 11 - 3 (Regular,Pro,Pro Max)
 t_for_n = [3,4,4,1]
+
+#Models of iphones 
 m = ["Regular","Pro","Pro Max","Mini"]
+
+#Memory for iphones (each iphone type AND model has different memory combinations)
 mem = ["64GB", "128GB","256GB","512GB","1TB"]
 
 #Starting and finishing indexes for memory options based on name and model 
@@ -63,13 +69,14 @@ m_for_mem = [
 [(0,3),(0,0),(0,0),(0,0)]
 ]
 
+#used to get lists of actual data for our global arrays by using scraped data
 def get_real_lists(n,p,l,name,model,memory): 
     names = [] 
     price = []
     links = []
     memory =str(int(memory[:len(memory)-2]))  #Take out "GB"
 
-    if model != "Regular": 
+    if model != "Regular": #Regular model will not check for name "Regular" in it
         for i in range(len(n)): 
             if name in n[i] and model in n[i] and memory in n[i]: #checks if name, model,and memory are in the title 
                 if model == "Pro": #filers out the pro max 
@@ -101,6 +108,7 @@ def get_real_lists(n,p,l,name,model,memory):
 
     return names,price,links
 
+#remove the $ sign and commas from number prices 
 def fix_price(p): 
     num ="1234567890" 
     l = ""
@@ -110,7 +118,7 @@ def fix_price(p):
     
     return int(l)
 
-
+#used to start searching apple website with name, model, amd memory 
 def search_apple(n,t,m):
     global location 
     global prices 
@@ -123,64 +131,72 @@ def search_apple(n,t,m):
     s = ""
     for i in name: 
         s+=i.lower()+"-"
-    s = s[0:len(s)-1]
+    s = s[0:len(s)-1] 
 
-    #Search Apple 
+    #Search Apple with name that we formated above
     url = "https://www.apple.com/tw/shop/buy-iphone/"+s
 
+    #for pro models we need to include the "pro" name in the url search
     if n == "iPhone 13" and (t == "Pro" or t == "Pro Max"): 
         url+="-pro"
     
     #For Iphone 11 and SE, order is color selection->memory->no 
-    #For others, order is model -> color selection ->memeory ->no 
+    #For others, order is model -> color selection ->memory ->no 
     #Select the year
     if (n == "iPhone 11" and t!= "Pro" and t!="Pro Max") or n == "iPhone SE":
 
-        #opens browser to the weather 
+        #opens browser to apple website
         browser = webdriver.Chrome(executable_path = driverPath)
         browser.get(url)
         time.sleep(1)
 
+        #selects the Color
         select =browser.find_element_by_xpath("//div[@class='rc-dimension-multiple form-selector-swatch column large-6 small-6 form-selector']")
         select.click()
         time.sleep(1)
 
+        #selects the Memory 
         mem_p = "//input[@data-autom='dimensionCapacity"+m.lower()+"']"
         select =browser.find_element_by_xpath(mem_p)
         select.click() 
         time.sleep(1)
 
+        #Presses "No"
         select =browser.find_element_by_xpath("//input[@data-autom='choose-noTradeIn']")
         select.click() 
         time.sleep(3)
         
+        #retrieves the price 
         price = browser.find_element_by_xpath("//span[@data-autom='full-price']")
+        #retrieves the url 
         url = browser.current_url
         
+        #formats the string price 
         p = fix_price(price.text) 
 
-        prices.append(p)
-
-        link.append(url)
-        location.append("Apple")
-
+        #formats the keyword/name on the website to not include "Regular" 
         if t == "Regular": #without any addition 
             keyword = n+" "+m
         else:  #needs to include the model 
             keyword = n+" "+t+" "+m
 
+        #Appends information to global arrays
+        prices.append(p)
+        link.append(url)
+        location.append("Apple")
         name_on_web.append(keyword)
 
+        #quit browser and sets flag R1 to 1 to indicate data is gotten
         browser.quit()
         R1 = 1
 
-
     elif (n == "iPhone 12" and t!="Pro" and t!= "Pro Max") or (n=="iPhone 13" and t!="Pro" and t!="Pro Max"): 
-        #opens browser to the weather 
+        #opens browser to apple website  
         browser = webdriver.Chrome(executable_path = driverPath)
         browser.get(url)
         time.sleep(1)
 
+        #if the model is regular or mini, select seperate buttons
         if t == "Regular": 
             select =browser.find_element_by_xpath("//input[@data-autom='dimensionScreensize6_1inch']")
             select.click() 
@@ -190,45 +206,54 @@ def search_apple(n,t,m):
             select =browser.find_element_by_xpath("//input[@data-autom='dimensionScreensize5_4inch']")
             select.click() 
             time.sleep(1)
-        
+
+        #Press the color
         select =browser.find_element_by_xpath("//div[@class='rc-dimension-multiple form-selector-swatch column large-6 small-6 form-selector']")
         select.click()
-        time.sleep(1)
+        time.sleep(1)   
 
+        #Select the memory 
         mem_p = "//input[@data-autom='dimensionCapacity"+m.lower()+"']"
         select =browser.find_element_by_xpath(mem_p)
         select.click() 
         time.sleep(1)
 
+        #Press "no"
         select =browser.find_element_by_xpath("//input[@data-autom='choose-noTradeIn']")
         select.click() 
         time.sleep(3)
 
+        #gets price and formats it
         price = browser.find_element_by_xpath("//span[@data-autom='full-price']")
+        p = fix_price(price.text)
+
+        #gets url 
         url = browser.current_url
         
-        p = fix_price(price.text) 
-
-        prices.append(p)
-        link.append(url)
-        location.append("Apple")
-
+        #if Regular we dont add the word "Regular"
         if t == "Regular": #without any addition 
             keyword = n+" "+m
         else:  #needs to include the model 
             keyword = n+" "+t+" "+m
 
+
+        #Appends information to global arrays
+        prices.append(p)
+        link.append(url)
+        location.append("Apple")
         name_on_web.append(keyword)
 
+        #quit browser and sets flag R1 to 1 to indicate data is gotten
         browser.quit()
         R1 = 1
     
     elif n=="iPhone 13" and (t == "Pro" or t=="Pro Max"):
-        #opens browser to the weather 
+        #opens browser to apple website
         browser = webdriver.Chrome(executable_path = driverPath)
         browser.get(url)
         time.sleep(1)
 
+        #if the model is pro or max, select seperate buttons
         if t == "Pro": 
             select =browser.find_element_by_xpath("//input[@data-autom='dimensionScreensize6_1inch']")
             select.click() 
@@ -239,43 +264,50 @@ def search_apple(n,t,m):
             select.click() 
             time.sleep(1)
         
+        #select the color
         select =browser.find_element_by_xpath("//div[@class='rc-dimension-multiple form-selector-swatch column large-6 small-6 form-selector']")
         select.click()
         time.sleep(1)
 
+        #selects the memory 
         mem_p = "//input[@data-autom='dimensionCapacity"+m.lower()+"']"
         select =browser.find_element_by_xpath(mem_p)
         select.click() 
         time.sleep(1)
 
+        #Presses "no"
         select =browser.find_element_by_xpath("//input[@data-autom='choose-noTradeIn']")
         select.click() 
         time.sleep(3)
 
         #Extract the Price and URL 
         price = browser.find_element_by_xpath("//span[@data-autom='full-price']")
+        p = fix_price(price.text) 
         url = browser.current_url
         
-        p = fix_price(price.text) 
-
-        prices.append(p)
-        link.append(url)
-        location.append("Apple")
         
         if t == "Regular": #without any addition 
             keyword = n+" "+m
         else:  #needs to include the model 
             keyword = n+" "+t+" "+m
 
+        #Appends information to global arrays
+        prices.append(p)
+        link.append(url)
+        location.append("Apple")
         name_on_web.append(keyword)
 
+        #quit browser and sets flag R1 to 1 to indicate data is gotten
         browser.quit()
         R1 = 1
 
     else: 
+        #some models ex. iPhone 11 Pro is NOT on apple so we just pass
         print("None")
         R1 = 1
 
+
+#used to start searching PCHome website with name, model, amd memory 
 def search_pchome(name,model,memory): 
 
     global location 
@@ -286,12 +318,17 @@ def search_pchome(name,model,memory):
 
     #Search PCHome
     url = "https://shopping.pchome.com.tw/"
+    
+    #Pop up window sometimes comes up, so we disable notifications
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument("--disable-notifications")
 
-    #opens browser to the weather 
-    browser = webdriver.Chrome(executable_path = driverPath)
+    #goes to PCHome URL
+    browser = webdriver.Chrome(executable_path = driverPath,chrome_options=chrome_options)
     browser.get(url)
     time.sleep(1)
 
+    #format the keyword used to search
     t_mem = memory 
     if memory != "1TB": #for TB we leave the "TB" at the end 
         t_mem = memory[0:len(memory)-2] #formats memory to leave out "gb" to get more results in search
@@ -300,19 +337,18 @@ def search_pchome(name,model,memory):
     else:  #needs to include the model 
         keyword = name+" "+model+" "+t_mem
 
-
+    #Search the keyword and clicks enter
     inputElement = browser.find_element_by_id("keyword")
     inputElement.send_keys(keyword) 
     select = browser.find_element_by_xpath("//span[@class='ico ico_search']")
     select.click() 
-    time.sleep(4)
+    time.sleep(2)
 
     #Page dynamically generates items from search as you scroll down more. Therefore
     #I will need to scroll all the way to the bottom of the page before crawling occurs
-
-
     SCROLL_PAUSE_TIME = 0.5
-    # used to get scroll height 
+
+   # used to get scroll height 
     p_h = browser.execute_script("return document.body.scrollHeight") #previous height of document 
 
     while True:
@@ -328,15 +364,16 @@ def search_pchome(name,model,memory):
         if n_h == p_h: #if we reach the bottom then we stop 
             break
         p_h = n_h #let previous height equal new height (continously scrolls until we hit bottom)
-        print("Scrolling")
 
-        
+    #gets the current url     
     url = browser.current_url
 
+    #gets the names,price, and link list 
     names = browser.find_elements_by_xpath("//h5[@class='prod_name']")
     price_l = browser.find_elements_by_xpath("//ul[@class='price_box']")
     links = browser.find_elements_by_css_selector(".prod_name [href]")
     
+    #gets the specific string names, prices, and links for extracted data 
     str_names = [i.text for i in names]
     str_prices = [i.text for i in price_l] 
     links = [l.get_attribute('href') for l in links]
@@ -345,23 +382,26 @@ def search_pchome(name,model,memory):
     for i in str_prices:
         P_L.append(fix_price(i))
     
+    #closes window
     browser.quit()
     
-    
-    time.sleep(2)
 
     #The filtering on PChome is not so great, therefore I will need to manually check 
     #items in order to see if it matches with requested iphone specs
     real_names, real_prices,real_links = get_real_lists(str_names,P_L,links,name,model,memory)
 
+    #Add the multiple items from search results in the global arrays
     for i in range(len(real_names)):
         name_on_web.append(real_names[i])
         prices.append(real_prices[i])
         link.append(real_links[i])
         location.append("PCHome")
 
+    #set R2 data flag to 1
     R2 = 1
 
+
+#used to start searching Studio A website with name, model, amd memory 
 def search_studioA(name,model,memory): 
 
     global location 
@@ -371,21 +411,32 @@ def search_studioA(name,model,memory):
     global R3 
     
     #search Studio A - short iphone section because it is limited
-    url = "https://www.studioa.com.tw/categories/iphone?sort_by=lowest_price&order_by=desc"
+    url = "https://www.studioa.com.tw/products?query=iphone&sort_by=lowest_price&order_by=desc"
 
-    #opens browser to the weather 
-    browser = webdriver.Chrome(executable_path = driverPath)
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument("--disable-notifications")
+    browser = webdriver.Chrome(executable_path = driverPath,chrome_options=chrome_options)
     browser.get(url)
     time.sleep(2)
 
+    #gets the names,price, and link list 
     names = browser.find_elements_by_xpath("//div[@class='title text-primary-color title-container ellipsis ']")
     price_l = browser.find_elements_by_xpath("//div[@class='quick-cart-price']")
     links = browser.find_elements_by_xpath("//a[@class='quick-cart-item']")
+
+    str_names = [] 
+    test_link = []
+    for i in names:
+        str_names.append(i.text)
+        
+    for i in links: 
+        test_link.append(i.get_attribute('href'))
+
+    #SLOWER FOR SOME REASON??? 
+    # str_names = [i.text for i in names]
+    # links = [l.get_attribute('href') for l in links]
+
     
-
-    str_names = [i.text for i in names]
-    links = [l.get_attribute('href') for l in links]
-
     #SOME ITEMS have a sale price and some just have a regular price, therefore
     #I need to get the smaller prices for the two prices recieved 
     price_real = [] 
@@ -397,226 +448,56 @@ def search_studioA(name,model,memory):
         else: 
             price_real.append(fix_price(l[0]))
     
+    #closes window
+    browser.quit()
+    
+
     #The filtering on Studio A includes extra data, therefore I will need to manually check 
     #items in order to see if it matches with requested iphone specs
-    real_names, real_prices,real_links = get_real_lists(str_names,price_real,links,name,model,memory)
+    real_names, real_prices,real_links = get_real_lists(str_names,price_real,test_link,name,model,memory)
 
-    browser.quit()
+    #Add the multiple items from search results in the global arrays
     for i in range(len(real_names)):
         name_on_web.append(real_names[i])
         prices.append(real_prices[i])
         link.append(real_links[i])
         location.append("Studio A")
-    
+
+    #sets R3 data flag to 1
     R3 = 1    
 
-def model_select(n):
-    MODELS = []
-    num = t_for_n[n-1]
-    for i in range(num): 
-        MODELS.append(m[i])
-    return MODELS
-    
-def memory_select(name,model): 
-    name = name - 1 
-    model = model - 1
-    start,finish = m_for_mem[name][model]
-    STORAGE = [] 
-    for i in range(start,finish): 
-        STORAGE.append(mem[i])
-    return STORAGE
+############### USED FOR THE OLD VERSION  - CLI VERSION ####################
 
-def iphone_select(): 
-    print('iPhone Best Price Finder')
-    print("Select iPhone") 
-    print("1 - iPhone 11")
-    print("2 - iPhone 12") 
-    print("3 - iPhone 13")
-    print("4 - iPhone SE")
-    name = int(input())
-    while(name<1 or name>4): 
-        print("Invalid Number, enter another")
-        name = int(input())
-    return name 
+# #used to go to model selection page with the iphone type
+# def model_select(n):
+#     MODELS = []
+#     num = t_for_n[n-1]
+#     for i in range(num): 
+#         MODELS.append(m[i])
+#     return MODELS
 
-#resizing the image so they are all the same size (smaller)
-def resize_image(loc,w,h): 
-    iphone = Image.open(loc)
-    iphone = iphone.resize((w,h))
-    img = ImageTk.PhotoImage(iphone)
-    return img 
+# #used to go to memory selection page based on iphone type and model
+# def memory_select(name,model): 
+#     name = name - 1 
+#     model = model - 1
+#     start,finish = m_for_mem[name][model]
+#     STORAGE = [] 
+#     for i in range(start,finish): 
+#         STORAGE.append(mem[i])
+#     return STORAGE
 
-#When the specific image is hovered over, the image size will change to a larger size 
-def hovered_over(e,imgname, but,locx,locy,hovx,hovy):
-    bigger_img = resize_image('Pictures/'+imgname+'.png',hovx,hovy)
-    but.config(image = bigger_img)
-    but.image = bigger_img
-    but.place(x=locx, y = locy)
-
-#When cursor is not over the image, the image size will change back to normal 
-def not_hovered_over(e,imgname, but,locx,locy,hovx,hovy):
-    normal_img = resize_image('Pictures/'+imgname+'.png',hovx,hovy)
-    but.config(image = normal_img)
-    but.image = normal_img
-    but.place(x=locx, y = locy) 
-
-def go_to_model(name):
-    global SEARCH_NAME
-    global n_v
-    n_v = name
-    show_frame(ModelSelection)
-    if name == 1: 
-        show_frame(iPhone11_MODEL_FRAME)
-        SEARCH_NAME = n[0]
-        print(SEARCH_NAME)
-    elif name == 2:
-        show_frame(iPhone12_MODEL_FRAME)
-        SEARCH_NAME = n[1]
-        print(SEARCH_NAME)
-    elif name == 3:
-        show_frame(iPhone13_MODEL_FRAME)
-        SEARCH_NAME = n[2]
-        print(SEARCH_NAME)
-    elif name == 4:
-        show_frame(iPhoneSE_MODEL_FRAME)
-        SEARCH_NAME = n[3]
-        print(SEARCH_NAME)
-
-def go_to_storage(SEL_MODEL, s):
-    show_frame(StorageSelection)
-    global s_v 
-    global SEARCH_NAME
-    s_v = (SEL_MODEL, s)
-    global SEARCH_MODEL
-    SEARCH_MODEL = m[SEL_MODEL-1]
-    model = SEL_MODEL-1
-    name = n.index(SEARCH_NAME) 
-    start,finish = m_for_mem[name][model]
-    print(start,finish)
-    MEMORY = [] 
-    for i in range(start, finish): 
-        MEMORY.append(mem[i])
-    
-    print(SEARCH_NAME+SEARCH_MODEL)
-    print(MEMORY)
-    
-    if s == 1: #(0,2)
-        show_frame(MEMPG1)
-    
-    elif s == 2: #(0,3)
-        show_frame(MEMPG2)
-    
-    elif s == 3: #(0,4) 
-        show_frame(MEMPG3)
-    
-    elif s == 4: #(1,4) 
-        show_frame(MEMPG4)
-    
-    elif s == 5: #(1,5)
-        show_frame(MEMPG5)
-
-def search(l): 
-    global SEARCH_NAME
-    global SEARCH_MODEL
-    global SEARCH_STORAGE
-    global st_v
-    st_v = l
-
-    if l == 1: 
-        SEARCH_STORAGE = "1TB"
-    else: 
-        SEARCH_STORAGE = str(l)+"GB"
-    
-    Search_Label.config(text = SEARCH_NAME+" "+SEARCH_MODEL+" "+SEARCH_STORAGE)
-    NAME_Label.config(text = SEARCH_NAME)
-    MODEL_Label.config(text = SEARCH_MODEL)
-    STORAGE_Label.config(text = SEARCH_STORAGE)
-    show_frame(InstructionScreen)
-
-
-#Function to switch between frames 
-def show_frame(frame): 
-    frame.tkraise()
-
-def check_data(): 
-    global R1,R2,R3 
-    while True:
-        if R1 == 1 and R2 == 1 and R3 == 1:
-            show_frame(DataScreen)
-            R1 = 0 
-            R2 = 0 
-            R3 = 0 
-
-            dict = { 
-                "Name on Web":name_on_web,
-                "Location":location,
-                "Price":prices,
-                "Link":link
-            }
-
-            df = pd.DataFrame(dict) 
-
-            df = df.sort_values(by=['Price'])
-            df2 = df.reset_index(drop=True)
-            print(df2)
-
-            tv1["column"] = list(df2.columns)
-            tv1["show"] = "headings"
-            for column in tv1["columns"]:
-                tv1.heading(column,text = column)
-            
-            df_rows = df.to_numpy().tolist()
-            for row in df_rows: 
-                tv1.insert("","end",values=row)
-            
-
-
-
-            break
-
-def start_search(): 
-    CD = threading.Thread(target = check_data,daemon=True) 
-    CD.start()
-
-    t1 = threading.Thread(target = search_apple, args =(SEARCH_NAME,SEARCH_MODEL,SEARCH_STORAGE),daemon=True) 
-    t1.start()
-
-    t2 = threading.Thread(target = search_pchome, args =(SEARCH_NAME,SEARCH_MODEL,SEARCH_STORAGE),daemon=True) 
-    t2.start()
-
-    t3 = threading.Thread(target = search_studioA, args =(SEARCH_NAME,SEARCH_MODEL,SEARCH_STORAGE),daemon=True) 
-    t3.start()
-
-def goback(i):
-    global n_v 
-    global s_v
-    global st_v
-    global SEARCH_NAME
-    global SEARCH_MODEL
-    global SEARCH_STORAGE
-
-    if i == 1: #switching to iphone selection screen
-        print(n_v)
-        n_v = 0
-        SEARCH_NAME = ""
-        show_frame(iPhoneSelection)
-    elif i == 2:
-        print(s_v)
-        s_v = (0,0)
-        SEARCH_MODEL = ""
-        go_to_model(n_v)
-    elif i == 3: 
-        print(st_v)
-        st_v = 0
-        x,y = s_v
-        SEARCH_STORAGE = ""
-        go_to_storage(x,y)
-
-    print("####### START #########")
-    print(SEARCH_NAME) 
-    print(SEARCH_MODEL)
-    print(SEARCH_STORAGE)
-    print("####### END ###########")
+# def iphone_select(): 
+#     print('iPhone Best Price Finder')
+#     print("Select iPhone") 
+#     print("1 - iPhone 11")
+#     print("2 - iPhone 12") 
+#     print("3 - iPhone 13")
+#     print("4 - iPhone SE")
+#     name = int(input())
+#     while(name<1 or name>4): 
+#         print("Invalid Number, enter another")
+#         name = int(input())
+#     return name 
 
 
 #MAINN
@@ -651,7 +532,243 @@ def goback(i):
 # df2 = df.reset_index(drop=True)
 # print(df2)
 
-#GUI Specifications and Setup 
+############### USED FOR THE NEW VERSION  - GUI VERSION ####################
+
+#Manually changes the model page based on name
+def go_to_model(name):
+    global SEARCH_NAME
+    global n_v
+    n_v = name
+    show_frame(ModelSelection)
+    if name == 1: 
+        show_frame(iPhone11_MODEL_FRAME) #1 refers to iphone 11 
+        SEARCH_NAME = n[0]
+        print(SEARCH_NAME)
+    elif name == 2:
+        show_frame(iPhone12_MODEL_FRAME) #2 refers to iphone 12
+        SEARCH_NAME = n[1]
+        print(SEARCH_NAME)
+    elif name == 3:
+        show_frame(iPhone13_MODEL_FRAME) #3 refers to iphone 13
+        SEARCH_NAME = n[2]
+        print(SEARCH_NAME)
+    elif name == 4:
+        show_frame(iPhoneSE_MODEL_FRAME) #4 refers to iphone SE
+        SEARCH_NAME = n[3]
+        print(SEARCH_NAME)
+
+#Manually changes the storage page based on selected model and type
+def go_to_storage(SEL_MODEL, s):
+    show_frame(StorageSelection)
+    global s_v 
+    global SEARCH_NAME
+    s_v = (SEL_MODEL, s)
+    
+    #gets the search model 
+    global SEARCH_MODEL
+    SEARCH_MODEL = m[SEL_MODEL-1]
+
+    #gets the start and finish indexes for mem
+    model = SEL_MODEL-1
+    name = n.index(SEARCH_NAME) 
+    start,finish = m_for_mem[name][model]
+    print(start,finish)
+
+    #prints out storage for that specific type and model
+    MEMORY = [] 
+    for i in range(start, finish): 
+        MEMORY.append(mem[i])
+    
+    print(SEARCH_NAME+SEARCH_MODEL)
+    print(MEMORY)
+    
+    if s == 1: #(0,2)
+        show_frame(MEMPG1)
+    
+    elif s == 2: #(0,3)
+        show_frame(MEMPG2)
+    
+    elif s == 3: #(0,4) 
+        show_frame(MEMPG3)
+    
+    elif s == 4: #(1,4) 
+        show_frame(MEMPG4)
+    
+    elif s == 5: #(1,5)
+        show_frame(MEMPG5)
+
+#used to compile information on the instruction/confirmation page before search starts
+def search(l): 
+    global SEARCH_NAME
+    global SEARCH_MODEL
+    global SEARCH_STORAGE
+    global st_v
+    st_v = l
+
+    if l == 1: 
+        SEARCH_STORAGE = "1TB"
+    else: 
+        SEARCH_STORAGE = str(l)+"GB"
+    
+    Search_Label.config(text = SEARCH_NAME+" "+SEARCH_MODEL+" "+SEARCH_STORAGE)
+    NAME_Label.config(text = SEARCH_NAME)
+    MODEL_Label.config(text = SEARCH_MODEL)
+    STORAGE_Label.config(text = SEARCH_STORAGE)
+    show_frame(InstructionScreen)
+
+#used ot start thread searches when user presses search button
+def start_search(): 
+    CD = threading.Thread(target = check_data,daemon=True) 
+    CD.start()
+
+    t3 = threading.Thread(target = search_studioA, args =(SEARCH_NAME,SEARCH_MODEL,SEARCH_STORAGE),daemon=True) 
+    t3.start()
+
+    t1 = threading.Thread(target = search_apple, args =(SEARCH_NAME,SEARCH_MODEL,SEARCH_STORAGE),daemon=True) 
+    t1.start()
+
+    t2 = threading.Thread(target = search_pchome, args =(SEARCH_NAME,SEARCH_MODEL,SEARCH_STORAGE),daemon=True) 
+    t2.start()
+
+
+#Function to switch between frames 
+def show_frame(frame): 
+    frame.tkraise()
+
+
+#this thread starts to check when all data is available and scraping is done 
+#when finished, a dataframe will be formed to compile all the data together 
+#that will be used for the end table
+def check_data(): 
+    global R1,R2,R3 
+    while True:
+        if R1 == 1 and R2 == 1 and R3 == 1: #if all data flags are true
+            show_frame(DataScreen)
+            R1 = 0 
+            R2 = 0 
+            R3 = 0 
+
+            dict = { 
+                "Name on Web":name_on_web,
+                "Location":location,
+                "Price":prices,
+                "Link":link
+            }
+            AC = 0 #Apple Count 
+            PCC = 0 #PCHome Count
+            SAC = 0 #Studio A Count
+
+            #creates dataframe from the dict
+            df = pd.DataFrame(dict) 
+
+            #counts the number of each search result for each website
+            for i in range(len(dict["Name on Web"])): 
+                if dict["Location"][i] == "Apple": 
+                    AC+=1 
+                elif dict["Location"][i] == "PCHome": 
+                    PCC+=1
+                else: 
+                    SAC+=1
+            
+            #show the search info by configure labels defined below
+            Apple_Label_D.config(text = str(AC))
+            PCHome_Label_D.config(text = str(PCC))
+            SA_Label_D.config(text = str(SAC))
+            Total_Label_C.config(text = str(AC+PCC+SAC))
+            Search_Label2.config(text = SEARCH_NAME+" "+SEARCH_MODEL+" "+SEARCH_STORAGE)
+
+            #sorts table based on price and drops the index
+            df = df.sort_values(by=['Price'])
+            df2 = df.reset_index(drop=True)
+            print(df2)
+
+            #formats the columns and headings
+            tv1["column"] = list(df2.columns)
+            tv1["show"] = "headings"
+
+            tv1.heading(tv1["column"][0], text = tv1["column"][0])
+            tv1.column(tv1["column"][0], stretch = True, width = 400)
+
+            tv1.heading(tv1["column"][1], text = tv1["column"][1])
+            tv1.column(tv1["column"][1],stretch = True, width = 100)
+
+            tv1.heading(tv1["column"][2], text = tv1["column"][2])
+            tv1.column(tv1["column"][2], stretch = True, width = 100)
+
+            tv1.heading(tv1["column"][3], text = tv1["column"][3])
+            tv1.column(tv1["column"][3], stretch = True, width = 400)
+
+            #adds the rows of data to the table
+            df_rows = df.to_numpy().tolist()
+            for row in df_rows: 
+                tv1.insert("","end",values=row)
+
+            #binds the items so that user can click on the selected item and the website will pop up 
+            tv1.bind('<<TreeviewSelect>>', item_selected)
+            break
+
+#if item from table is selected, a webpage with the link will pop up 
+def item_selected(event):
+    link = ""
+    for selected_item in tv1.selection():
+        item = tv1.item(selected_item)
+        record = item['values']
+        link = record[3]
+    #pops up window for users to view website page
+    browser = webdriver.Chrome(executable_path = driverPath)
+    browser.get(link)
+
+#go back function allows for users to go back to previous page in case a mistake is made
+def goback(i):
+    global n_v 
+    global s_v
+    global st_v
+
+    global SEARCH_NAME
+    global SEARCH_MODEL
+    global SEARCH_STORAGE
+
+    if i == 1: #switching back to iphone selection screen
+        print(n_v)
+        n_v = 0
+        SEARCH_NAME = ""
+        show_frame(iPhoneSelection)
+    elif i == 2: #switching back to model selection screen 
+        print(s_v)
+        s_v = (0,0)
+        SEARCH_MODEL = ""
+        go_to_model(n_v)
+    elif i == 3: #switching back to storage selection screen 
+        print(st_v)
+        st_v = 0
+        x,y = s_v
+        SEARCH_STORAGE = ""
+        go_to_storage(x,y)
+
+
+#resizing the image so they are all the same size (smaller)
+def resize_image(loc,w,h): 
+    iphone = Image.open(loc)
+    iphone = iphone.resize((w,h))
+    img = ImageTk.PhotoImage(iphone)
+    return img 
+
+#When the specific image is hovered over, the image size will change to a larger size 
+def hovered_over(e,imgname, but,locx,locy,hovx,hovy):
+    bigger_img = resize_image('Pictures/'+imgname+'.png',hovx,hovy)
+    but.config(image = bigger_img)
+    but.image = bigger_img
+    but.place(x=locx, y = locy)
+
+#When cursor is not over the image, the image size will change back to normal 
+def not_hovered_over(e,imgname, but,locx,locy,hovx,hovy):
+    normal_img = resize_image('Pictures/'+imgname+'.png',hovx,hovy)
+    but.config(image = normal_img)
+    but.image = normal_img
+    but.place(x=locx, y = locy) 
+
+########################  GUI Specifications and Setup  ###########################
+
 root = tk.Tk()
 root.title('The Right iPhone')
 
@@ -667,7 +784,6 @@ root.geometry("{}x{}+{}+{}".format(window_width, window_height, x_cordinate, y_c
 style = ttk.Style(root)
 root.tk.call('source', 'GUI_Design/azure dark.tcl')
 style.theme_use('azure')
-
 
 
 # Importing the Pictures used in the program as visual aid and resizing them to be the same size
@@ -693,6 +809,7 @@ iPhone13_Mini = resize_image('Pictures/iPhone13_Mini.png',220,320)
 iPhoneSE_Regular = resize_image('Pictures/iPhoneSE_Regular.png',250,350)
 
 Instructions = resize_image('Pictures/Instructions.png',900,300)
+Instructions2 = resize_image('Pictures/Instructions2.png',750,150)
 
 mem1 = resize_image('Pictures/64GB.png',250,350)
 mem2 = resize_image('Pictures/128GB.png',250,350)
@@ -789,8 +906,6 @@ Back_Button = ttk.Button(iPhone13_MODEL_FRAME, text = "Back", style = "Accentbut
 Back_Button.place(x = 1110, y = 10)
 Back_Button = ttk.Button(iPhoneSE_MODEL_FRAME, text = "Back", style = "Accentbutton",command = lambda:goback(1))
 Back_Button.place(x = 1110, y = 10)
-
-
 
 
 px1 = 60
@@ -1112,8 +1227,40 @@ Search.place(x = 950, y = 600)
 
 
 ###################### FIFTH PAGE - DATA SCREEN ########################
+Results_Label = tk.Label(DataScreen, text = "Search Results",font = ("Arial 50 underline"))
+Results_Label.place(x = 360, y = 30)
+
+Search_Label1 =  tk.Label(DataScreen, text="Searched:", font = ("Arial", 20))
+Search_Label1.place(x = 100, y = 150)
+
+Search_Label2 = tk.Label(DataScreen, font = ("Arial", 20))
+Search_Label2.place(x = 250, y = 150)
+
+XX1 = -200
+YY1 = 55
+Apple_Label = tk.Label(DataScreen, text = "Apple:",font = ("Arial", 20))
+Apple_Label.place(x = 300+XX1, y = 150+YY1)
+Apple_Label_D = tk.Label(DataScreen, text = "0",font = ("Arial", 20))
+Apple_Label_D.place(x = 380+XX1, y = 151+YY1)
+
+PCHome_Label = tk.Label(DataScreen, text = "PCHome:",font = ("Arial", 20))
+PCHome_Label.place(x = 450+XX1, y = 150+YY1)
+PCHome_Label_D = tk.Label(DataScreen, text = "0",font = ("Arial", 20))
+PCHome_Label_D.place(x = 570+XX1, y = 151+YY1)
+
+SA_Label = tk.Label(DataScreen, text = "Studio A:",font = ("Arial", 20))
+SA_Label.place(x = 640+XX1, y = 150+YY1)
+SA_Label_D = tk.Label(DataScreen, text = "0",font = ("Arial", 20))
+SA_Label_D.place(x = 760+XX1, y = 151+YY1)
+
+Total_Label = tk.Label(DataScreen, text = "Total:",font = ("Arial", 20))
+Total_Label.place(x = 990, y = 150+YY1)
+Total_Label_C = tk.Label(DataScreen, text = "0",font = ("Arial", 20))
+Total_Label_C.place(x = 1070, y = 151+YY1)
+
+
 DATA_VIEW = tk.LabelFrame(DataScreen,text = "Data")
-DATA_VIEW.place(x = 100, y = 50, height = 300, width = 700)
+DATA_VIEW.place(x = 100, y = 240, height = 300, width = 1000)
 tv1 = ttk.Treeview(DATA_VIEW,height = 10)
 tv1.place(relheight=1, relwidth=1)
 
@@ -1124,6 +1271,10 @@ treescrollx.pack(side= "bottom", fill = "x")
 treescrolly.pack(side = "right", fill ="y")
 
 
+Instructions2_L = tk.Label(DataScreen, image = Instructions2)
+Instructions2_L.place(x = 230, y = 550)
+            
+######################## MAIN FUNCTION - MAIN TKINTER LOOP #######################
 def main():
 
     root.mainloop()
