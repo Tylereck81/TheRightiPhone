@@ -5,7 +5,7 @@ Class: Data Science
 Professor: 賴志宏  (Chih-Hung Lai)    
 
 ## Introduction 
-The Right iPhone is a program that will allow users to choose the specific type, model, and memory of iPhone that is available on the market, search for the prices on different websites, and compile all this information together for the user to observe. 
+The Right iPhone is a program that allows users to choose the specific type, model, and memory of iPhone that is available on the market, search for the prices on different websites, and compile all this information together for the user to observe. 
 
 Within the repository, you will find the following files:
 - Documents - The Final Right-iPhone Report 
